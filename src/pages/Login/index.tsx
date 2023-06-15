@@ -60,16 +60,18 @@ const Login = () => {
                         Continue with Allaccess wallet
                     </Typography>
                     <Button
-                        onClick={() => { navigate("/home") }}
+                        href="http://localhost:3000/"
                         fullWidth
                         size="large"
                         variant="contained"
+                        target="_blank"
                         color="primary"
                         style={{
                             marginTop: "20px",
                             borderRadius: '10px',
 
                         }}
+                        onClick={async () => await navigate('/home')}
                     >Login with Google</Button>
                 </Box>
             </Modal>
