@@ -64,18 +64,23 @@ const Login = () => {
                         fullWidth
                         size="large"
                         variant="contained"
-                        target="_blank"
+                        target="popup"
                         color="primary"
                         style={{
                             marginTop: "20px",
                             borderRadius: '10px',
 
                         }}
-                        onClick={async () => await navigate('/home')}
+                        onClick={() => {
+                            window.open('http://localhost:3000/', 'popup', 'width=500,height=600');
+                            navigate('/home')
+                            return false;
+
+                        }}
                     >Login with Google</Button>
                 </Box>
             </Modal>
-        </div>
+        </div >
     );
 };
 

@@ -70,13 +70,14 @@ const Main = () => {
                         <Button
                             size="large"
                             href="http://localhost:3000/sign-transaction/%7B%22to%22:%20%220x1234567890abcdef%22,%22value%22:%20%220.001%22%7D"
-                            target="_blank"
+                            target="popup"
                             style={{ marginTop: "20px", borderRadius: '10px' }}
                             fullWidth
                             variant="contained"
                             color="primary"
                             onClick={() => {
-
+                                window.open('http://localhost:3000/sign-transaction/%7B%22to%22:%20%220x1234567890abcdef%22,%22value%22:%20%220.001%22%7D', 'popup', 'width=500,height=600');
+                                return false;
                             }
 
                             }
@@ -102,10 +103,12 @@ const Main = () => {
                             href="http://localhost:3000/sign-transaction/%7B%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22,%20%22tokenContract%22%20:%20%220x73967c6a0904aA032C103b4104747E88c566B1A2%22%7D"
                             style={{ marginTop: "20px", borderRadius: '10px' }}
                             fullWidth
-                            target="_blank"
+                            target="popup"
                             variant="contained"
                             color="primary"
                             onClick={() => {
+                                window.open('http://localhost:3000/sign-transaction/%7B%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22,%20%22tokenContract%22%20:%20%220x73967c6a0904aA032C103b4104747E88c566B1A2%22%7D', 'popup', 'width=500,height=600');
+                                return false;
                             }
                             }
                         > Send Transaction</Button>
