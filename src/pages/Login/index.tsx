@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
@@ -7,6 +7,8 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import GoogleIcon from '@mui/icons-material/Google';
+import Cookies from 'universal-cookie';
+
 const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex',
@@ -40,7 +42,13 @@ const Login = () => {
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-
+    const cookies = new Cookies();
+    const myAddress = cookies.get("torusKey") || "";
+    useEffect(() => {
+        if (myAddress) {
+            navigate("/home");
+        }
+    }, [myAddress,]);
     return (
         <div className={classes.root}>
             <Paper elevation={10} >
@@ -60,7 +68,7 @@ const Login = () => {
                         Continue with Allaccess wallet
                     </Typography>
                     <Button
-                        href="http://localhost:3000/"
+                        href="http://localhost:3000/login"
                         fullWidth
                         size="large"
                         variant="contained"
@@ -72,8 +80,8 @@ const Login = () => {
 
                         }}
                         onClick={() => {
-                            window.open('http://localhost:3000/', 'popup', 'width=500,height=600');
-                            navigate('/home')
+                            window.open('http://localhost:3000/login', 'popup', 'width=500,height=600');
+                            // get address from server?
                             return false;
 
                         }}

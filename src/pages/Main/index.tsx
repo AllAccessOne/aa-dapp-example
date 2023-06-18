@@ -24,7 +24,7 @@ import MuiAlert, { AlertProps } from '@mui/material/Alert';
 const steps = ['Start', 'Pending', 'Success'];
 
 const Main = () => {
-    const myAddress = "0x04E407C7d7C2A6aA7f2e66B0B8C0dBcafA5E3Afe";
+
 
     return (
         <>
