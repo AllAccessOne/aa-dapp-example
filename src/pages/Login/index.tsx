@@ -68,7 +68,7 @@ const Login = () => {
                         Continue with Allaccess wallet
                     </Typography>
                     <Button
-                        href="http://localhost:3000/login"
+                        href="http://localhost:3000/"
                         fullWidth
                         size="large"
                         variant="contained"
@@ -80,7 +80,7 @@ const Login = () => {
 
                         }}
                         onClick={() => {
-                            window.open('http://localhost:3000/login', 'popup', 'width=500,height=600');
+                            window.open('http://localhost:3000/', 'popup', 'width=500,height=600');
                             // get address from server?
                             return false;
 
