@@ -5,11 +5,14 @@ import { LogoText, Copy } from "../../assets/icon";
 import { sliceAddress, copyAddress } from "../../utils";
 import { Button } from "@material-ui/core";
 import { getBalance, useBlockchain } from "../../blockchain";
+import Cookies from 'universal-cookie';
+
 import Web3 from "web3";
 const Header = () => {
     const navigate = useNavigate();
-    //  navigate("/home");
-    const myAddress = "0x04E407C7d7C2A6aA7f2e66B0B8C0dBcafA5E3Afe";
+    const cookies = new Cookies();
+    const myAddress = cookies.get('masterKey') ? cookies.get('masterKey') : "";
+
     const [balance, setBalance] = useState("0");
     const { web3 } = useBlockchain("https://goerli.blockpi.network/v1/rpc/public")
 
@@ -17,6 +20,11 @@ const Header = () => {
         getBalance(web3 as Web3).then(res => {
             setBalance(res)
         })
+    }, [])
+    useEffect(() => {
+        myAddress ?
+            null :
+            navigate("/")
     }, [])
     return (
         <HeaderApp>

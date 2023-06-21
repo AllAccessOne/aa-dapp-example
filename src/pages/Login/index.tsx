@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
@@ -7,6 +7,8 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import GoogleIcon from '@mui/icons-material/Google';
+import Cookies from 'universal-cookie';
+
 const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex',
@@ -40,7 +42,13 @@ const Login = () => {
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-
+    const cookies = new Cookies();
+    const myAddress = cookies.get("masterKey") || "";
+    useEffect(() => {
+        if (myAddress) {
+            navigate("/home");
+        }
+    }, [myAddress, cookies.get("masterKey")]);
     return (
         <div className={classes.root}>
             <Paper elevation={10} >
@@ -64,18 +72,23 @@ const Login = () => {
                         fullWidth
                         size="large"
                         variant="contained"
-                        target="_blank"
+                        target="popup"
                         color="primary"
                         style={{
                             marginTop: "20px",
                             borderRadius: '10px',
 
                         }}
-                        onClick={async () => await navigate('/home')}
+                        onClick={ () => {
+                            window.open('http://localhost:3000/', 'popup', 'width=500,height=600');
+                            // get address from server?
+                            return false;
+
+                        }}
                     >Login with Google</Button>
                 </Box>
             </Modal>
-        </div>
+        </div >
     );
 };
 

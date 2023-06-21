@@ -24,7 +24,7 @@ import MuiAlert, { AlertProps } from '@mui/material/Alert';
 const steps = ['Start', 'Pending', 'Success'];
 
 const Main = () => {
-    const myAddress = "0x04E407C7d7C2A6aA7f2e66B0B8C0dBcafA5E3Afe";
+
 
     return (
         <>
@@ -69,14 +69,15 @@ const Main = () => {
                         </Typography>
                         <Button
                             size="large"
-                            href="http://localhost:3000/sign-transaction/%7B%22to%22:%20%220x1234567890abcdef%22,%22value%22:%20%220.001%22%7D"
-                            target="_blank"
+                            href="http://localhost:3000/sign-transaction/%7B%22chainId%22:%20%225%22,%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22%7D"
+                            target="popup"
                             style={{ marginTop: "20px", borderRadius: '10px' }}
                             fullWidth
                             variant="contained"
                             color="primary"
                             onClick={() => {
-
+                                window.open('http://localhost:3000/sign-transaction/%7B%22chainId%22:%20%225%22,%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22%7D', 'popup', 'width=500,height=600');
+                                return false;
                             }
 
                             }
@@ -99,13 +100,15 @@ const Main = () => {
                         </Typography>
                         <Button
                             size="large"
-                            href="http://localhost:3000/sign-transaction/%7B%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22,%20%22tokenContract%22%20:%20%220x73967c6a0904aA032C103b4104747E88c566B1A2%22%7D"
+                            href="http://localhost:3000/sign-transaction/%7B%22chainId%22:%20%225%22,%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22,%20%22contract%22%20:%20%220xBa8DCeD3512925e52FE67b1b5329187589072A55%22%7D"
                             style={{ marginTop: "20px", borderRadius: '10px' }}
                             fullWidth
-                            target="_blank"
+                            target="popup"
                             variant="contained"
                             color="primary"
                             onClick={() => {
+                                window.open('http://localhost:3000/sign-transaction/%7B%22chainId%22:%20%225%22,%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22,%20%22contract%22%20:%20%220xBa8DCeD3512925e52FE67b1b5329187589072A55%22%7D', 'popup', 'width=500,height=600');
+                                return false;
                             }
                             }
                         > Send Transaction</Button>
