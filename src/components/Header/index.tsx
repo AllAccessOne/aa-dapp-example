@@ -11,7 +11,7 @@ import Web3 from "web3";
 const Header = () => {
     const navigate = useNavigate();
     const cookies = new Cookies();
-    const myAddress = cookies.get('torusKey') ? cookies.get('torusKey') : "";
+    const myAddress = cookies.get('masterKey') ? cookies.get('masterKey') : "";
 
     const [balance, setBalance] = useState("0");
     const { web3 } = useBlockchain("https://goerli.blockpi.network/v1/rpc/public")

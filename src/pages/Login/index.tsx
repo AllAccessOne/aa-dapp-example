@@ -43,12 +43,12 @@ const Login = () => {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const cookies = new Cookies();
-    const myAddress = cookies.get("torusKey") || "";
+    const myAddress = cookies.get("masterKey") || "";
     useEffect(() => {
         if (myAddress) {
             navigate("/home");
         }
-    }, [myAddress,]);
+    }, [myAddress, cookies.get("masterKey")]);
     return (
         <div className={classes.root}>
             <Paper elevation={10} >
@@ -79,7 +79,7 @@ const Login = () => {
                             borderRadius: '10px',
 
                         }}
-                        onClick={() => {
+                        onClick={ () => {
                             window.open('http://localhost:3000/', 'popup', 'width=500,height=600');
                             // get address from server?
                             return false;
