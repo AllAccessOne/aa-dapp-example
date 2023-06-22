@@ -6,7 +6,6 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
-import GoogleIcon from '@mui/icons-material/Google';
 import Cookies from 'universal-cookie';
 
 const useStyles = makeStyles((theme) => ({
@@ -48,7 +47,7 @@ const Login = () => {
         if (myAddress) {
             navigate("/home");
         }
-    }, [myAddress, cookies.get("masterKey")]);
+    }, [myAddress]);
     return (
         <div className={classes.root}>
             <Paper elevation={10} >
@@ -68,7 +67,7 @@ const Login = () => {
                         Continue with Allaccess wallet
                     </Typography>
                     <Button
-                        href="http://localhost:3000/"
+                        href='http://localhost:3000/{"chainId": "5"}'
                         fullWidth
                         size="large"
                         variant="contained"
@@ -79,7 +78,7 @@ const Login = () => {
                             borderRadius: '10px',
 
                         }}
-                        onClick={ () => {
+                        onClick={() => {
                             window.open('http://localhost:3000/', 'popup', 'width=500,height=600');
                             // get address from server?
                             return false;

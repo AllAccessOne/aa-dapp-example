@@ -1,34 +1,15 @@
-import { useNavigate } from "react-router-dom";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { Header } from "../../components";
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
-import { CardActionArea } from '@mui/material';
 import Button from "@mui/material/Button";
-import { useBlockchain } from "../../blockchain";
-import Paper from '@material-ui/core/Paper';
-import { makeStyles } from '@material-ui/core/styles';
-import Box from '@mui/material/Box';
-import Modal from '@mui/material/Modal';
-import Web3 from "web3";
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepButton from '@mui/material/StepButton';
-import CircularProgress from '@mui/material/CircularProgress';
-import Stack from '@mui/material/Stack';
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
-const steps = ['Start', 'Pending', 'Success'];
 
 const Main = () => {
-
-
     return (
         <>
-
             <Header />
             <BodyApp>
                 <Card sx={{ maxWidth: 345 }}>
@@ -69,14 +50,14 @@ const Main = () => {
                         </Typography>
                         <Button
                             size="large"
-                            href="http://localhost:3000/sign-transaction/%7B%22chainId%22:%20%225%22,%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22%7D"
+                            href="http://localhost:3000/sign-transaction/%7B%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22%7D"
                             target="popup"
                             style={{ marginTop: "20px", borderRadius: '10px' }}
                             fullWidth
                             variant="contained"
                             color="primary"
                             onClick={() => {
-                                window.open('http://localhost:3000/sign-transaction/%7B%22chainId%22:%20%225%22,%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22%7D', 'popup', 'width=500,height=600');
+                                window.open('http://localhost:3000/sign-transaction/%7B%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22%7D', 'popup', 'width=500,height=600');
                                 return false;
                             }
 
@@ -100,14 +81,14 @@ const Main = () => {
                         </Typography>
                         <Button
                             size="large"
-                            href="http://localhost:3000/sign-transaction/%7B%22chainId%22:%20%225%22,%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22,%20%22contract%22%20:%20%220xBa8DCeD3512925e52FE67b1b5329187589072A55%22%7D"
+                            href="http://localhost:3000/sign-transaction/%7B%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22,%20%22contract%22%20:%20%220xBa8DCeD3512925e52FE67b1b5329187589072A55%22%7D"
                             style={{ marginTop: "20px", borderRadius: '10px' }}
                             fullWidth
                             target="popup"
                             variant="contained"
                             color="primary"
                             onClick={() => {
-                                window.open('http://localhost:3000/sign-transaction/%7B%22chainId%22:%20%225%22,%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22,%20%22contract%22%20:%20%220xBa8DCeD3512925e52FE67b1b5329187589072A55%22%7D', 'popup', 'width=500,height=600');
+                                window.open('http://localhost:3000/sign-transaction/%7B%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22,%20%22contract%22%20:%20%220xBa8DCeD3512925e52FE67b1b5329187589072A55%22%7D', 'popup', 'width=500,height=600');
                                 return false;
                             }
                             }
@@ -133,28 +114,3 @@ const BodyApp = styled.div`
   padding: 40px;
   margin-top: 40px;
 `;
-const style = {
-    position: 'absolute' as 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 700,
-    bgcolor: 'background.paper',
-    borderRadius: '10px',
-    boxShadow: 24,
-    p: 6,
-};
-
-
-
-type FormData = {
-    addressTo: string;
-    amount: string;
-}
-
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-    props,
-    ref,
-) {
-    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
