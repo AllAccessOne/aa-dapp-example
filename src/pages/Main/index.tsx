@@ -6,8 +6,22 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import Button from "@mui/material/Button";
-
+import Cookies from 'universal-cookie';
+import { useLocation } from "react-router-dom";
+type InfoTransacions = {
+    addressTo: string;
+    amount: string;
+    contractTo?: string;
+    origin: string;
+};
 const Main = () => {
+    const cookies = new Cookies();
+    const location = useLocation();
+    const SendETH: InfoTransacions = {
+        addressTo: "0x9B0A2787d685dd68245EfD2C737386F392cDD8aE",
+        amount: "0.001",
+        origin: location.pathname
+    }
     return (
         <>
             <Header />
@@ -50,14 +64,14 @@ const Main = () => {
                         </Typography>
                         <Button
                             size="large"
-                            href="http://localhost:3000/sign-transaction/%7B%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22%7D"
+                            href="http://localhost:3000/transaction"
                             target="popup"
                             style={{ marginTop: "20px", borderRadius: '10px' }}
                             fullWidth
                             variant="contained"
                             color="primary"
                             onClick={() => {
-                                window.open('http://localhost:3000/sign-transaction/%7B%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22%7D', 'popup', 'width=500,height=600');
+                                cookies.set("transaction", JSON.stringify(SendETH))
                                 return false;
                             }
 
@@ -81,14 +95,14 @@ const Main = () => {
                         </Typography>
                         <Button
                             size="large"
-                            href="http://localhost:3000/sign-transaction/%7B%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22,%20%22contract%22%20:%20%220xBa8DCeD3512925e52FE67b1b5329187589072A55%22%7D"
+                            href="http://localhost:3000/transaction"
                             style={{ marginTop: "20px", borderRadius: '10px' }}
                             fullWidth
                             target="popup"
                             variant="contained"
                             color="primary"
                             onClick={() => {
-                                window.open('http://localhost:3000/sign-transaction/%7B%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22,%20%22contract%22%20:%20%220xBa8DCeD3512925e52FE67b1b5329187589072A55%22%7D', 'popup', 'width=500,height=600');
+                                // cookies.set("transaction", JSON.stringify(SendETH))
                                 return false;
                             }
                             }

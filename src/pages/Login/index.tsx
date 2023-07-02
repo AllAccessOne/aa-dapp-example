@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import Cookies from 'universal-cookie';
-
+import { useLocation } from "react-router-dom";
 const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex',
@@ -37,6 +37,8 @@ const style = {
 const Login = () => {
     const navigate = useNavigate();
     //  navigate("/home");
+    const location = useLocation();
+
     const classes = useStyles();
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
@@ -79,7 +81,7 @@ const Login = () => {
 
                         }}
                         onClick={() => {
-                            window.open('http://localhost:3000/', 'popup', 'width=500,height=600');
+                            cookies.set('origin', location.pathname)
                             // get address from server?
                             return false;
 
