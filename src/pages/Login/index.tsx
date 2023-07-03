@@ -7,7 +7,6 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import Cookies from 'universal-cookie';
-import { useLocation } from "react-router-dom";
 const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex',
@@ -37,8 +36,7 @@ const style = {
 const Login = () => {
     const navigate = useNavigate();
     //  navigate("/home");
-    const location = useLocation();
-
+    const domainTest = "http://mymarketplace.com"
     const classes = useStyles();
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
@@ -69,7 +67,7 @@ const Login = () => {
                         Continue with Allaccess wallet
                     </Typography>
                     <Button
-                        href='http://localhost:3000/{"chainId": "5"}'
+                        href='http://localhost:3000/'
                         fullWidth
                         size="large"
                         variant="contained"
@@ -81,8 +79,8 @@ const Login = () => {
 
                         }}
                         onClick={() => {
-                            cookies.set('origin', location.pathname)
-                            // get address from server?
+                            cookies.set('origin', domainTest);
+                            cookies.set('chainId', "97");
                             return false;
 
                         }}

@@ -9,23 +9,18 @@ import Cookies from 'universal-cookie';
 
 import Web3 from "web3";
 const Header = () => {
-    const navigate = useNavigate();
     const cookies = new Cookies();
     const myAddress = cookies.get('masterKey') ? cookies.get('masterKey') : "";
 
     const [balance, setBalance] = useState("0");
-    const { web3 } = useBlockchain("https://goerli.blockpi.network/v1/rpc/public")
+    const { web3 } = useBlockchain("https://data-seed-prebsc-2-s2.binance.org:8545")
 
     useEffect(() => {
         getBalance(web3 as Web3).then(res => {
             setBalance(res)
         })
     }, [])
-    useEffect(() => {
-        myAddress ?
-            null :
-            navigate("/")
-    }, [])
+
     return (
         <HeaderApp>
             <LogoText style={{ width: "20vh" }} />
@@ -37,7 +32,7 @@ const Header = () => {
                 </Button>
                 <BalanceCard>
                     <div>Balance</div>
-                    <div><b style={{ color: "green" }}>{balance}</b> ETH</div>
+                    <div><b style={{ color: "green" }}>{balance}</b> BNB</div>
                 </BalanceCard>
             </InfoAccount>
         </HeaderApp>

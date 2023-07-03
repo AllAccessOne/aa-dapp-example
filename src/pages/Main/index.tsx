@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { Header } from "../../components";
 import Card from '@mui/material/Card';
@@ -7,20 +7,39 @@ import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import Button from "@mui/material/Button";
 import Cookies from 'universal-cookie';
-import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { BNBLogo, USDTLogo } from "../../assets/img";
+
 type InfoTransacions = {
     addressTo: string;
     amount: string;
     contractTo?: string;
     origin: string;
+    symbol?: string;
 };
 const Main = () => {
     const cookies = new Cookies();
-    const location = useLocation();
+    const domainTest = "http://mymarketplace.com"
+    const navigate = useNavigate();
+    const myAddress = cookies.get('masterKey') ? cookies.get('masterKey') : "";
+
+    useEffect(() => {
+        if (!myAddress)
+            navigate("/")
+    }, [myAddress])
     const SendETH: InfoTransacions = {
         addressTo: "0x9B0A2787d685dd68245EfD2C737386F392cDD8aE",
         amount: "0.001",
-        origin: location.pathname
+        origin: domainTest,
+        symbol: "BNB"
+
+    }
+    const SendUSDT: InfoTransacions = {
+        addressTo: "0x9B0A2787d685dd68245EfD2C737386F392cDD8aE",
+        amount: "2",
+        origin: domainTest,
+        contractTo: "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd",
+        symbol: "USDT"
     }
     return (
         <>
@@ -52,15 +71,15 @@ const Main = () => {
 
                     <CardMedia
                         component="img"
-                        image="https://www.spectre.ai/assets/images/assets/ETH-logo.png?v=2.13"
-                        alt="ETH"
+                        image={BNBLogo}
+                        alt="BNB"
                     />
                     <CardContent>
                         <Typography gutterBottom variant="h5" component="div">
-                            Send ETH to other Address
+                            Send BNB to other Address
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                            I will send 0.01 ETH of you for address 0x04E407C7d7...0dBcafA5E3Afe
+                            I will send 0.01 BNB of you for address 0x9B0A2787d685dd68245EfD2C737386F392cDD8aE
                         </Typography>
                         <Button
                             size="large"
@@ -83,15 +102,15 @@ const Main = () => {
 
                     <CardMedia
                         component="img"
-                        image="https://s2.coinmarketcap.com/static/img/coins/200x200/4943.png"
-                        alt="DAI"
+                        image={USDTLogo}
+                        alt="USDT"
                     />
                     <CardContent>
                         <Typography gutterBottom variant="h5" component="div">
-                            Send DAI to other Address
+                            Send USDT to other Address
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                            I will send 10 DAI of you for address 0x04E407C7d7...0dBcafA5E3Afe
+                            I will send 10 USDT of you for address 0x9B0A2787d685dd68245EfD2C737386F392cDD8aE
                         </Typography>
                         <Button
                             size="large"
@@ -102,7 +121,7 @@ const Main = () => {
                             variant="contained"
                             color="primary"
                             onClick={() => {
-                                // cookies.set("transaction", JSON.stringify(SendETH))
+                                cookies.set("transaction", JSON.stringify(SendUSDT))
                                 return false;
                             }
                             }
