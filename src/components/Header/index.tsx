@@ -29,7 +29,6 @@ const Header = (props: Props) => {
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => {
-        updateDomain(domainTest);
         updateChainId(props.network.chainID)
         setOpen(false)
     };
