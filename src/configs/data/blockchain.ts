@@ -1,65 +1,30 @@
-type ChainNetwork = {
-  chainId: string,
-  apiScanNormalTransactionsByAddress: string
-  apiScanTokenTransactionsByAddress: string,
-  rpcUrl: string,
-  title: string,
-  description: string
-}
+export type ChainID = "1" | "5" | "9" | "56" | "97" | "flow-testnet";
+type ChainCore = "evm" | "fvm";
+
+export type ChainNetwork = {
+  chainID: ChainID;
+  core: ChainCore;
+  rpcUrls: string;
+  title: string;
+  description: string;
+  apiTransactionHash?: string;
+};
 export const listNetWorks: ChainNetwork[] = [
+
   {
-    chainId: "1",
-    apiScanNormalTransactionsByAddress: `https://api.etherscan.io/api?module=account&action=txlist&address={address}&sort=asc&apikey=6YA3MRG422USB7DWGGQTWHDZTUG248ZKJ5`,
-    apiScanTokenTransactionsByAddress: `https://api-goerli.etherscan.io/api?module=account&action=tokentx&contractaddress={contract}&address={address}&sort=asc&apikey=6YA3MRG422USB7DWGGQTWHDZTUG248ZKJ5`,
-    rpcUrl: "https://eth.llamarpc.com",
-    title: "ETH",
-    description: "Ethereum Mainnet",
-  },
-  {
-    chainId: "5",
-    apiScanNormalTransactionsByAddress: `https://api-goerli.etherscan.io/api?module=account&action=txlist&address={address}&sort=asc&apikey=6YA3MRG422USB7DWGGQTWHDZTUG248ZKJ5`,
-    apiScanTokenTransactionsByAddress: `https://api-goerli.etherscan.io/api?module=account&action=tokentx&contractaddress={contract}&address={address}&startblock=0&endblock=99999999&sort=asc&apikey=6YA3MRG422USB7DWGGQTWHDZTUG248ZKJ5`,
-    rpcUrl: "https://goerli.blockpi.network/v1/rpc/public",
-    title: "ETH",
-    description: "Goerli Testnet",
-  },
-  {
-    chainId: "56",
-    apiScanNormalTransactionsByAddress: "https://api.bscscan.com/api?module=account&action=txlist&address={address}&sort=asc&apikey=I1JJ6MQZRU7BG9WNH1FU69M3T377FIC4JW",
-    apiScanTokenTransactionsByAddress: `
-    https://api.bscscan.com/api
-   ?module=account
-   &action=tokentx
-   &contractaddress={contract}
-   &address={address}
-   &page=1
-   &offset=5
-   &startblock=0
-   &endblock=999999999
-   &sort=asc
-   &apikey=I1JJ6MQZRU7BG9WNH1FU69M3T377FIC4JW`,
-    rpcUrl: "https://bsc-dataseed1.binance.org",
-    title: "BNB",
-    description: "Binance Smart Chain Mainnet",
-  },
-  {
-    chainId: "97",
-    apiScanNormalTransactionsByAddress: "https://api.bscscan.com/api?module=account&action=txlist&address={address}&sort=asc&apikey=I1JJ6MQZRU7BG9WNH1FU69M3T377FIC4JW",
-    apiScanTokenTransactionsByAddress: `
-    https://api.bscscan.com/api
-   ?module=account
-   &action=tokentx
-   &contractaddress={contract}
-   &address={address}
-   &page=1
-   &offset=5
-   &startblock=0
-   &endblock=999999999
-   &sort=asc
-   &apikey=I1JJ6MQZRU7BG9WNH1FU69M3T377FIC4JW`,
-    rpcUrl: "https://bsc-testnet.publicnode.com",
+    chainID: "97",
+    core: "evm",
+    rpcUrls: "https://data-seed-prebsc-2-s2.binance.org:8545",
     title: "BNB",
     description: "Binance Smart Chain Testnet",
+    apiTransactionHash: `https://testnet.bscscan.com/tx/{transactionHash}`,
+  },
+  {
+    chainID: "flow-testnet",
+    core: "fvm",
+    rpcUrls: "https://access-testnet.onflow.org",
+    title: "Flow",
+    description: "Flow blockchain Testnet",
   },
 ];
 
