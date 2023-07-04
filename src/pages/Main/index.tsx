@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Header } from "../../components";
 import Card from '@mui/material/Card';
@@ -7,7 +7,6 @@ import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import Button from "@mui/material/Button";
 import Cookies from 'universal-cookie';
-import { useNavigate } from "react-router-dom";
 import { BNBLogo, USDTLogo } from "../../assets/img";
 import { listNetWorks, ChainNetwork } from "../../configs/data/blockchain"
 
@@ -21,6 +20,8 @@ type InfoTransacions = {
 const Main = () => {
     const cookies = new Cookies();
     const [network, setNetwork] = useState<ChainNetwork>(listNetWorks.find(network => network.chainID === '97') as ChainNetwork)
+    const walletURL = "http://localhost:3000/transaction"
+
     const domainTest = "http://mymarketplace.com"
     const SendETH: InfoTransacions = {
         addressTo: "0x9B0A2787d685dd68245EfD2C737386F392cDD8aE",
@@ -83,7 +84,7 @@ const Main = () => {
                             </Typography>
                             <Button
                                 size="large"
-                                href="http://localhost:3000/transaction"
+                                href={walletURL}
                                 target="popup"
                                 style={{ marginTop: "20px", borderRadius: '10px' }}
                                 fullWidth
@@ -117,7 +118,7 @@ const Main = () => {
                             </Typography>
                             <Button
                                 size="large"
-                                href="http://localhost:3000/transaction"
+                                href={walletURL}
                                 style={{ marginTop: "20px", borderRadius: '10px' }}
                                 fullWidth
                                 target="popup"
