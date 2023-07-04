@@ -20,8 +20,9 @@ type Props = {
 }
 const Header = (props: Props) => {
     const [cookies, setCookie, removeCookie] = useCookies(['masterKey', 'origin', 'chainId']);
-    const walletURL = "http://localhost:3000"
-    const domainTest = "http://mymarketplace.com"
+    const walletURL: string = process.env.REACT_APP_WALLET_ENDPOINT as string;
+    const domainTest: string = process.env.REACT_APP_DOMAIN as string;
+
     const [myAddress, setMyAddress] = useState('');
     const [balance, setBalance] = useState("0");
     const [statusAddress, setStatusAddress] = useState(false);

@@ -20,9 +20,9 @@ type InfoTransacions = {
 const Main = () => {
     const cookies = new Cookies();
     const [network, setNetwork] = useState<ChainNetwork>(listNetWorks.find(network => network.chainID === '97') as ChainNetwork)
-    const walletURL = "http://localhost:3000/transaction"
+    const walletURL: string = process.env.REACT_APP_WALLET_ENDPOINT as string;
 
-    const domainTest = "http://mymarketplace.com"
+    const domainTest: string = process.env.REACT_APP_DOMAIN as string;
     const SendETH: InfoTransacions = {
         addressTo: "0x9B0A2787d685dd68245EfD2C737386F392cDD8aE",
         amount: "0.001",
