@@ -27,23 +27,18 @@ const Header = (props: Props) => {
     const [balance, setBalance] = useState("0");
     const [statusAddress, setStatusAddress] = useState(false);
     const { web3 } = useBlockchain(props.network.rpcUrls);
-    const [open, setOpen] = React.useState(false);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => {
-        updateChainId(props.network.chainID)
-        setOpen(false)
-    };
 
-    useEffect(() => {
-        const masterKey = cookies['masterKey'] || '';
-        if (masterKey) {
-            getBalance(web3 as Web3).then(res => {
-                setBalance(res);
-            })
-        }
-        setStatusAddress(!!masterKey);
-        setMyAddress(masterKey);
-    }, [cookies.masterKey]);
+
+    // useEffect(() => {
+    //     const masterKey = cookies['masterKey'] || '';
+    //     if (masterKey) {
+    //         getBalance(web3 as Web3).then(res => {
+    //             setBalance(res);
+    //         })
+    //     }
+    //     setStatusAddress(!!masterKey);
+    //     setMyAddress(masterKey);
+    // }, [cookies.masterKey]);
 
     const updateDomain = (value: string) => {
         setCookie('origin', value, { path: '/' });
@@ -58,9 +53,50 @@ const Header = (props: Props) => {
         const currentNetwork = listNetWorks.find(network => network.description === event.target.value) as ChainNetwork;
         props.setNetwork(currentNetwork);
     }
+    const handleLogin = () => {
+        const popupWindow = window.open(walletURL, "popup", 'width=500,height=700') as Window;
+        const chainId = props.network.chainID;
+        popupWindow.postMessage({ type: "CHAIN_ID", data: chainId }, "*");
+        const handleTest = () => {
+            popupWindow.postMessage({ type: "CHAIN_ID", data: chainId }, "*")
+        }
+        let intervalId: NodeJS.Timeout | undefined;
+        intervalId = setInterval(handleTest, 1000);
+        setTimeout(() => {
+            clearInterval(intervalId)
+            window.removeEventListener("message", handlePopupResponse);
+            popupWindow.close();
+        }, 60000)
+        const handlePopupResponse = (event: any) => {
+            if (event.data.type === "ADDRESS") {
+                const address = event.data.data;
+                setMyAddress(address);
+                setStatusAddress(!!address);
+                if (address)
+                    getBalance(web3 as Web3, address).then(res => {
+                        setBalance(res);
+                    })
+                clearInterval(intervalId);
+                window.removeEventListener("message", handlePopupResponse);
+                popupWindow.close();
+            }
+        };
+        window.addEventListener("message", handlePopupResponse);
+
+        return false;
+    }
     return (
         <HeaderApp>
-            <LogoText style={{ width: "20vh" }} />
+            <LogoText style={{ width: "200px", height: "100px" }} />
+            <FormControlCustom>
+                <SelectCustom disabled={statusAddress ? true : false} value={props.network.description} onChange={handleChange}>
+                    {listNetWorks.map(network => (
+                        <MenuItemCustom key={network.chainID} value={network.description}>
+                            <p>{network.description}</p>
+                        </MenuItemCustom>
+                    ))}
+                </SelectCustom>
+            </FormControlCustom>
             {statusAddress ?
                 <InfoAccount>
                     <Button onClick={() => copyAddress(myAddress)}
@@ -79,60 +115,31 @@ const Header = (props: Props) => {
                             marginLeft: '10px'
                         }}
                         onClick={() => {
-                            removeCookieMasterKey();
+                            setMyAddress("");
+                            setStatusAddress(false);
                             return false;
                         }}><LogoutIcon></LogoutIcon></Button>
                 </InfoAccount>
 
                 : <>
-                    <FormControlCustom>
-                        <SelectCustom value={props.network.description} onChange={handleChange}>
-                            {listNetWorks.map(network => (
-                                <MenuItemCustom key={network.chainID} value={network.description}>
-                                    <p>{network.description}</p>
-                                </MenuItemCustom>
-                            ))}
-                        </SelectCustom>
-                    </FormControlCustom>
+
                     <Button
-                        href={walletURL}
+
                         size="large"
                         variant="contained"
-                        target="popup"
+
                         color="primary"
                         style={{
                             borderRadius: '10px',
 
                         }}
                         onClick={() => {
-
-                            updateDomain(domainTest);
-                            updateChainId(props.network.chainID)
-                            handleOpen();
+                            handleLogin()
                             return false;
 
                         }}
                     >Connect wallet</Button></>}
-            <Modal
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box sx={style}>
-                    <LogoText style={{ height: '40px', width: '500px' }} />
 
-                    <Typography id="modal-modal-description" sx={{ mt: 5 }}>
-                        Please go to Allaccess.one website to confirm connect wallet.
-
-                    </Typography>
-                    <Button
-                        style={{ marginTop: '30px' }}
-                        onClick={() => handleClose()}>
-                        Click here if you have confirmed
-                    </Button>
-                </Box>
-            </Modal>
         </HeaderApp>
     );
 };
