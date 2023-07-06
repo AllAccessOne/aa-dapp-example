@@ -1,13 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Login, Main } from "./pages";
-import React, { useEffect } from "react";
+import { Main } from "./pages";
 
 const RouterApp = () => {
     return (
         <Router>
             <Routes>
-                <Route path='/' element={<Login />} />
-                <Route path='/home' element={<Main />} />
+                <Route path='/' element={<Main />} />
             </Routes>
         </Router>
     );

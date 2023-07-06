@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Header } from "../../components";
@@ -6,115 +5,235 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
-import { CardActionArea } from '@mui/material';
 import Button from "@mui/material/Button";
-import { useBlockchain } from "../../blockchain";
-import Paper from '@material-ui/core/Paper';
-import { makeStyles } from '@material-ui/core/styles';
-import Box from '@mui/material/Box';
-import Modal from '@mui/material/Modal';
-import Web3 from "web3";
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepButton from '@mui/material/StepButton';
-import CircularProgress from '@mui/material/CircularProgress';
-import Stack from '@mui/material/Stack';
+import { BNBLogo, ETHLogo, USDTLogo } from "../../assets/img";
+import { listNetWorks, ChainNetwork } from "../../configs/data/blockchain"
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
-const steps = ['Start', 'Pending', 'Success'];
-
+import Backdrop from "@mui/material/Backdrop";
+import CircularProgress from "@mui/material/CircularProgress";
+import { useBlockchain } from "../../blockchain";
+import { transfer } from "../../blockchain/transfer";
+import Web3 from "web3";
+type InfoTransacions = {
+    addressTo: string;
+    amount: string;
+    contractTo?: string;
+    origin: string;
+    symbol?: string;
+};
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref,
+) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 const Main = () => {
+    const [myAddress, setMyAddress] = useState('');
 
+    const [network, setNetwork] = useState<ChainNetwork>(listNetWorks.find(network => network.chainID === '97') as ChainNetwork)
+    const walletURL: string = process.env.REACT_APP_WALLET_ENDPOINT + "/transaction" as string;
+    const domainTest: string = process.env.REACT_APP_DOMAIN as string;
+    const [open, setOpen] = React.useState(false);
+    const [openLoadingPage, setOpenLoadingPage] = React.useState(false);
+    const [statusSend, setStatusSend] = React.useState(false);
+    const [infoTransactions, setInfoTransactions] = React.useState("");
+    const { web3 } = useBlockchain(network.rpcUrls, myAddress);
 
+    const handleCloseLoadingPage = () => {
+        setOpenLoadingPage(false);
+    };
+    const handleOpenLoadingPage = () => {
+        setOpenLoadingPage(true);
+    };
+    const handleSend = async (data: string) => {
+
+        handleOpenLoadingPage();
+        const text = await transfer(web3 as Web3, data);
+        if (text === "Successfully") {
+            setStatusSend(true);
+        }
+        else {
+            setStatusSend(false);
+        }
+        handleClick();
+        handleCloseLoadingPage();
+        setInfoTransactions(text);
+
+    };
+    const handleClick = () => {
+        setOpen(true);
+    };
+    const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpen(false);
+    };
+    const SendBNB: InfoTransacions = {
+        addressTo: "0x9B0A2787d685dd68245EfD2C737386F392cDD8aE",
+        amount: "0.001",
+        origin: domainTest,
+        symbol: "BNB"
+
+    }
+    const SendETHGoerli: InfoTransacions = {
+        addressTo: "0x9B0A2787d685dd68245EfD2C737386F392cDD8aE",
+        amount: "0.001",
+        origin: domainTest,
+        symbol: "ETH"
+    }
+    const handleSendSignRequest = (dataTransaction: InfoTransacions) => {
+        if (!myAddress) {
+            setStatusSend(false);
+            setInfoTransactions("Please connect your wallet to your");
+            handleClick();
+            return false;
+        }
+        let intervalId: NodeJS.Timeout | undefined;
+
+        const popupWindow = window.open(walletURL, "popup", 'width=500,height=700') as Window;
+        popupWindow.postMessage({ type: "SIGN_REQ", data: dataTransaction }, "*");
+        const handleTest = () => {
+            popupWindow.postMessage({ type: "SIGN_REQ", data: dataTransaction }, "*")
+        }
+        intervalId = setInterval(handleTest, 1000);
+        setTimeout(() => {
+            clearInterval(intervalId)
+        }, 60000)
+        const handlePopupResponse = async (event: any) => {
+            if (event.data.type === "STATUS") {
+                const data = event.data.data;
+                if (!data) {
+                    setStatusSend(false);
+                    setInfoTransactions("Reject from Wallet");
+                    handleClick();
+                    clearInterval(intervalId);
+                    window.removeEventListener("message", handlePopupResponse);
+                    popupWindow.close();
+                    return false;
+                }
+                if (data.signed) {
+                    await handleSend(data.signed)
+                }
+                else if (data.error) {
+                    setStatusSend(false);
+                    setInfoTransactions(data.error);
+                    handleClick();
+                }
+                else {
+                    setStatusSend(false);
+                    setInfoTransactions("Reject from Wallet");
+                    handleClick();
+                }
+                clearInterval(intervalId);
+                window.removeEventListener("message", handlePopupResponse);
+                popupWindow.close();
+            }
+        };
+        window.addEventListener("message", handlePopupResponse);
+        return false;
+
+    }
     return (
         <>
-
-            <Header />
+            <Header network={network} setNetwork={setNetwork} myAddress={myAddress} setMyAddress={setMyAddress} />
             <BodyApp>
-                <Card sx={{ maxWidth: 345 }}>
-                    <CardMedia
-                        component="img"
-                        image="https://s2.coinmarketcap.com/static/img/coins/64x64/4558.png"
-                        alt="Flow"
-                    />
-                    <CardContent>
-                        <Typography gutterBottom variant="h5" component="div">
-                            Send Flow to other Address
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            I will send 0.01 Flow of you for address 0x090f8a70ed0dca73
-                        </Typography>
-                        <Button
-                            size="large"
-                            style={{ marginTop: "20px", borderRadius: '10px' }}
-                            fullWidth
-                            variant="contained"
-                            color="primary"
-                        > Send Transaction</Button>
-                    </CardContent>
-                </Card>
-                <Card sx={{ maxWidth: 345 }}>
 
-                    <CardMedia
-                        component="img"
-                        image="https://www.spectre.ai/assets/images/assets/ETH-logo.png?v=2.13"
-                        alt="ETH"
-                    />
-                    <CardContent>
-                        <Typography gutterBottom variant="h5" component="div">
-                            Send ETH to other Address
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            I will send 0.01 ETH of you for address 0x04E407C7d7...0dBcafA5E3Afe
-                        </Typography>
-                        <Button
-                            size="large"
-                            href="http://localhost:3000/sign-transaction/%7B%22chainId%22:%20%225%22,%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22%7D"
-                            target="popup"
-                            style={{ marginTop: "20px", borderRadius: '10px' }}
-                            fullWidth
-                            variant="contained"
-                            color="primary"
-                            onClick={() => {
-                                window.open('http://localhost:3000/sign-transaction/%7B%22chainId%22:%20%225%22,%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22%7D', 'popup', 'width=500,height=600');
-                                return false;
-                            }
+                {
+                    network.chainID === "flow-testnet" ?
+                        <Card sx={{ maxWidth: 345 }}>
+                            <CardMedia
+                                component="img"
+                                image="https://s2.coinmarketcap.com/static/img/coins/64x64/4558.png"
+                                alt="Flow"
+                            />
+                            <CardContent>
+                                <Typography gutterBottom variant="h5" component="div">
+                                    Send Flow to other Address
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    I will send 0.01 Flow of you for address 0x090f8a70ed0dca73
+                                </Typography>
+                                <Button
+                                    size="large"
+                                    style={{ marginTop: "20px", borderRadius: '10px' }}
+                                    fullWidth
+                                    variant="contained"
+                                    color="primary"
+                                > Send Transaction</Button>
+                            </CardContent>
+                        </Card> : null
+                }
+                {network.chainID === '97' ?
+                    <Card sx={{ maxWidth: 345 }}>
 
-                            }
-                        > Send Transaction</Button>
-                    </CardContent>
-                </Card>
-                <Card sx={{ maxWidth: 345 }}>
+                        <CardMedia
+                            component="img"
+                            image={BNBLogo}
+                            alt="BNB"
+                        />
+                        <CardContent>
+                            <Typography gutterBottom variant="h5" component="div">
+                                Send BNB to other Address
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                I will send 0.01 BNB of you for address 0x9B0A2787d685dd68245EfD2C737386F392cDD8aE
+                            </Typography>
+                            <Button
+                                size="large"
+                                style={{ marginTop: "20px", borderRadius: '10px' }}
+                                fullWidth
+                                variant="contained"
+                                color="primary"
+                                onClick={() => {
+                                    handleSendSignRequest(SendBNB)
+                                }
 
-                    <CardMedia
-                        component="img"
-                        image="https://s2.coinmarketcap.com/static/img/coins/200x200/4943.png"
-                        alt="DAI"
-                    />
-                    <CardContent>
-                        <Typography gutterBottom variant="h5" component="div">
-                            Send DAI to other Address
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            I will send 10 DAI of you for address 0x04E407C7d7...0dBcafA5E3Afe
-                        </Typography>
-                        <Button
-                            size="large"
-                            href="http://localhost:3000/sign-transaction/%7B%22chainId%22:%20%225%22,%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22,%20%22contract%22%20:%20%220xBa8DCeD3512925e52FE67b1b5329187589072A55%22%7D"
-                            style={{ marginTop: "20px", borderRadius: '10px' }}
-                            fullWidth
-                            target="popup"
-                            variant="contained"
-                            color="primary"
-                            onClick={() => {
-                                window.open('http://localhost:3000/sign-transaction/%7B%22chainId%22:%20%225%22,%20%22to%22:%20%220x04e407c7d7c2a6aa7f2e66b0b8c0dbcafa5e3afe%22,%22value%22:%20%220.001%22,%20%22contract%22%20:%20%220xBa8DCeD3512925e52FE67b1b5329187589072A55%22%7D', 'popup', 'width=500,height=600');
-                                return false;
-                            }
-                            }
-                        > Send Transaction</Button>
-                    </CardContent>
-                </Card>
+                                }
+                            > Send Transaction</Button>
+                        </CardContent>
+                    </Card>
+                    : null
+                }
+                {network.chainID === '5' ?
+                    <Card sx={{ maxWidth: 345 }}>
 
+                        <CardMedia
+                            component="img"
+                            image={ETHLogo}
+                            alt="USDT"
+                        />
+                        <CardContent>
+                            <Typography gutterBottom variant="h5" component="div">
+                                Send ETH to other Address
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                I will send 0.001 ETH of you for address 0x9B0A2787d685dd68245EfD2C737386F392cDD8aE
+                            </Typography>
+                            <Button
+                                size="large"
+                                style={{ marginTop: "20px", borderRadius: '10px' }}
+                                fullWidth
+                                variant="contained"
+                                color="primary"
+                                onClick={() => {
+                                    handleSendSignRequest(SendETHGoerli)
+                                }
+                                }
+                            > Send Transaction</Button>
+                        </CardContent>
+                    </Card>
+                    : null
+                }
+                <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
+                    <Alert severity={statusSend ? "success" : "error"} onClose={handleClose} sx={{ width: '100%' }}>
+                        {infoTransactions}
+                    </Alert>
+                </Snackbar>
+                <Backdrop sx={{ color: "#fff", zIndex: theme => theme.zIndex.drawer + 1 }} open={openLoadingPage}>
+                    <CircularProgress color='inherit' />
+                </Backdrop>
             </BodyApp>
         </>
     );
@@ -133,28 +252,4 @@ const BodyApp = styled.div`
   padding: 40px;
   margin-top: 40px;
 `;
-const style = {
-    position: 'absolute' as 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 700,
-    bgcolor: 'background.paper',
-    borderRadius: '10px',
-    boxShadow: 24,
-    p: 6,
-};
-
-
-
-type FormData = {
-    addressTo: string;
-    amount: string;
-}
-
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-    props,
-    ref,
-) {
-    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+export type SignedTransferResponse = { error?: string; signed?: string };
