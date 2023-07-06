@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Header } from "../../components";
 import Card from '@mui/material/Card';
@@ -6,10 +6,15 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import Button from "@mui/material/Button";
-import { BNBLogo, USDTLogo } from "../../assets/img";
+import { BNBLogo, ETHLogo, USDTLogo } from "../../assets/img";
 import { listNetWorks, ChainNetwork } from "../../configs/data/blockchain"
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import Backdrop from "@mui/material/Backdrop";
+import CircularProgress from "@mui/material/CircularProgress";
+import { useBlockchain } from "../../blockchain";
+import { transfer } from "../../blockchain/transfer";
+import Web3 from "web3";
 type InfoTransacions = {
     addressTo: string;
     amount: string;
@@ -24,11 +29,38 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 const Main = () => {
+    const [myAddress, setMyAddress] = useState('');
+
     const [network, setNetwork] = useState<ChainNetwork>(listNetWorks.find(network => network.chainID === '97') as ChainNetwork)
     const walletURL: string = process.env.REACT_APP_WALLET_ENDPOINT + "/transaction" as string;
-    const [statusTransaction, setStatusTransaction] = useState("");
     const domainTest: string = process.env.REACT_APP_DOMAIN as string;
     const [open, setOpen] = React.useState(false);
+    const [openLoadingPage, setOpenLoadingPage] = React.useState(false);
+    const [statusSend, setStatusSend] = React.useState(false);
+    const [infoTransactions, setInfoTransactions] = React.useState("");
+    const { web3 } = useBlockchain(network.rpcUrls, myAddress);
+
+    const handleCloseLoadingPage = () => {
+        setOpenLoadingPage(false);
+    };
+    const handleOpenLoadingPage = () => {
+        setOpenLoadingPage(true);
+    };
+    const handleSend = async (data: string) => {
+
+        handleOpenLoadingPage();
+        const text = await transfer(web3 as Web3, data);
+        if (text === "Successfully") {
+            setStatusSend(true);
+        }
+        else {
+            setStatusSend(false);
+        }
+        handleClick();
+        handleCloseLoadingPage();
+        setInfoTransactions(text);
+
+    };
     const handleClick = () => {
         setOpen(true);
     };
@@ -38,44 +70,74 @@ const Main = () => {
         }
         setOpen(false);
     };
-    const SendETH: InfoTransacions = {
+    const SendBNB: InfoTransacions = {
         addressTo: "0x9B0A2787d685dd68245EfD2C737386F392cDD8aE",
         amount: "0.001",
         origin: domainTest,
         symbol: "BNB"
 
     }
-    const SendUSDT: InfoTransacions = {
+    const SendETHGoerli: InfoTransacions = {
         addressTo: "0x9B0A2787d685dd68245EfD2C737386F392cDD8aE",
-        amount: "2",
+        amount: "0.001",
         origin: domainTest,
-        contractTo: "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd",
-        symbol: "USDT"
+        symbol: "ETH"
     }
     const handleSendSignRequest = (dataTransaction: InfoTransacions) => {
-        const popupWindow = window.open(walletURL + "/transaction", "popup", 'width=500,height=700') as Window;
+        if (!myAddress) {
+            setStatusSend(false);
+            setInfoTransactions("Please connect your wallet to your");
+            handleClick();
+            return false;
+        }
+        let intervalId: NodeJS.Timeout | undefined;
+
+        const popupWindow = window.open(walletURL, "popup", 'width=500,height=700') as Window;
         popupWindow.postMessage({ type: "SIGN_REQ", data: dataTransaction }, "*");
         const handleTest = () => {
             popupWindow.postMessage({ type: "SIGN_REQ", data: dataTransaction }, "*")
         }
-        setTimeout(handleTest, 1000)
-
-        // const handlePopupResponse = (event: any) => {
-        //     if (event.data.type === "STATUS") {
-        //         const status = event.data.data;
-        //         status ?
-        //             setStatusTransaction(status) : setStatusTransaction("Success!")
-        //         handleClick()
-        //         window.removeEventListener("message", handlePopupResponse);
-        //         popupWindow.close();
-        //     }
-        // };
-        // window.addEventListener("message", handlePopupResponse);
+        intervalId = setInterval(handleTest, 1000);
+        setTimeout(() => {
+            clearInterval(intervalId)
+        }, 60000)
+        const handlePopupResponse = async (event: any) => {
+            if (event.data.type === "STATUS") {
+                const data = event.data.data;
+                if (!data) {
+                    setStatusSend(false);
+                    setInfoTransactions("Reject from Wallet");
+                    handleClick();
+                    clearInterval(intervalId);
+                    window.removeEventListener("message", handlePopupResponse);
+                    popupWindow.close();
+                    return false;
+                }
+                if (data.signed) {
+                    await handleSend(data.signed)
+                }
+                else if (data.error) {
+                    setStatusSend(false);
+                    setInfoTransactions(data.error);
+                    handleClick();
+                }
+                else {
+                    setStatusSend(false);
+                    setInfoTransactions("Reject from Wallet");
+                    handleClick();
+                }
+                clearInterval(intervalId);
+                window.removeEventListener("message", handlePopupResponse);
+                popupWindow.close();
+            }
+        };
+        window.addEventListener("message", handlePopupResponse);
         return false;
+
     }
     return (
         <>
-            <Header network={network} setNetwork={setNetwork} />
+            <Header network={network} setNetwork={setNetwork} myAddress={myAddress} setMyAddress={setMyAddress} />
             <BodyApp>
 
                 {
@@ -120,14 +182,12 @@ const Main = () => {
                             </Typography>
                             <Button
                                 size="large"
-                                href={walletURL}
-                                target="popup"
                                 style={{ marginTop: "20px", borderRadius: '10px' }}
                                 fullWidth
                                 variant="contained"
                                 color="primary"
                                 onClick={() => {
-                                    handleSendSignRequest(SendETH)
+                                    handleSendSignRequest(SendBNB)
                                 }
 
                                 }
@@ -136,31 +196,29 @@ const Main = () => {
                     </Card>
                     : null
                 }
-                {network.chainID === '97' ?
+                {network.chainID === '5' ?
                     <Card sx={{ maxWidth: 345 }}>
 
                         <CardMedia
                             component="img"
-                            image={USDTLogo}
+                            image={ETHLogo}
                             alt="USDT"
                         />
                         <CardContent>
                             <Typography gutterBottom variant="h5" component="div">
-                                Send USDT to other Address
+                                Send ETH to other Address
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                I will send 10 USDT of you for address 0x9B0A2787d685dd68245EfD2C737386F392cDD8aE
+                                I will send 0.001 ETH of you for address 0x9B0A2787d685dd68245EfD2C737386F392cDD8aE
                             </Typography>
                             <Button
                                 size="large"
-                                href={walletURL}
                                 style={{ marginTop: "20px", borderRadius: '10px' }}
                                 fullWidth
-                                target="popup"
                                 variant="contained"
                                 color="primary"
                                 onClick={() => {
-                                    handleSendSignRequest(SendUSDT)
+                                    handleSendSignRequest(SendETHGoerli)
                                 }
                                 }
                             > Send Transaction</Button>
@@ -168,11 +226,14 @@ const Main = () => {
                     </Card>
                     : null
                 }
-                <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-                    <Alert onClose={handleClose} sx={{ width: '100%' }}>
-                        {statusTransaction}
+                <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
+                    <Alert severity={statusSend ? "success" : "error"} onClose={handleClose} sx={{ width: '100%' }}>
+                        {infoTransactions}
                     </Alert>
                 </Snackbar>
+                <Backdrop sx={{ color: "#fff", zIndex: theme => theme.zIndex.drawer + 1 }} open={openLoadingPage}>
+                    <CircularProgress color='inherit' />
+                </Backdrop>
             </BodyApp>
         </>
     );
@@ -191,3 +252,4 @@ const BodyApp = styled.div`
   padding: 40px;
   margin-top: 40px;
 `;
+export type SignedTransferResponse = { error?: string; signed?: string };

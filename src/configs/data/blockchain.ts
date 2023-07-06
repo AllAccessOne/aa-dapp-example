@@ -26,6 +26,14 @@ export const listNetWorks: ChainNetwork[] = [
     title: "Flow",
     description: "Flow blockchain Testnet",
   },
+  {
+    chainID: "5",
+    core: "evm",
+    rpcUrls: "https://goerli.blockpi.network/v1/rpc/public",
+    title: "ETH",
+    description: "Goerli Testnet",
+    apiTransactionHash: "https://goerli.etherscan.io/tx/{transactionHash}",
+  },
 ];
 
 // export const myToken: Token[] = [

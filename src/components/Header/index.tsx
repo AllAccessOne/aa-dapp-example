@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { listNetWorks, ChainNetwork } from "../../configs/data/blockchain"
 import styled from "styled-components"
 import { LogoText, Copy } from "../../assets/icon";
@@ -10,12 +10,14 @@ import Web3 from "web3";
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-import Stack from '@mui/material/Stack';
 import Snackbar from '@mui/material/Snackbar';
+
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 type Props = {
     network: ChainNetwork;
-    setNetwork: React.Dispatch<React.SetStateAction<ChainNetwork>>
+    setNetwork: React.Dispatch<React.SetStateAction<ChainNetwork>>;
+    myAddress: string;
+    setMyAddress: React.Dispatch<React.SetStateAction<string>>;
 }
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
@@ -26,10 +28,11 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
 const Header = (props: Props) => {
     const walletURL: string = process.env.REACT_APP_WALLET_ENDPOINT as string;
     const domainTest: string = process.env.REACT_APP_DOMAIN as string;
-    const [myAddress, setMyAddress] = useState('');
     const [balance, setBalance] = useState("0");
     const [statusAddress, setStatusAddress] = useState(false);
     const [open, setOpen] = React.useState(false);
+    const { web3 } = useBlockchain(props.network.rpcUrls, props.myAddress);
+
     const handleClick = () => {
         setOpen(true);
     };
@@ -39,7 +42,6 @@ const Header = (props: Props) => {
         }
         setOpen(false);
     };
-    const { web3 } = useBlockchain(props.network.rpcUrls);
 
     const handleChange = async (event: any) => {
         const currentNetwork = listNetWorks.find(network => network.description === event.target.value) as ChainNetwork;
@@ -66,7 +68,7 @@ const Header = (props: Props) => {
                 const address = event.data.data;
 
                 if (address) {
-                    setMyAddress(address);
+                    props.setMyAddress(address);
                     setStatusAddress(!!address);
                     if (address)
                         getBalance(web3 as Web3, address).then(res => {
@@ -85,6 +87,17 @@ const Header = (props: Props) => {
 
         return false;
     }
+    useEffect(() => {
+        try {
+
+            getBalance(web3 as Web3, props.myAddress).then(res => {
+                setBalance(res);
+            })
+        }
+        catch {
+            setBalance("Error");
+        }
+    }, [props.myAddress])
     return (
         <HeaderApp>
             <LogoText style={{ width: "200px", height: "100px" }} />
@@ -99,10 +112,10 @@ const Header = (props: Props) => {
             </FormControlCustom>
             {statusAddress ?
                 <InfoAccount>
-                    <Button onClick={() => copyAddress(myAddress)}
+                    <Button onClick={() => copyAddress(props.myAddress)}
                         style={{ borderRadius: '10px' }}
                         variant="outlined"
-                    > <Copy style={{ marginRight: '10px' }} />{sliceAddress(myAddress)}
+                    > <Copy style={{ marginRight: '10px' }} />{sliceAddress(props.myAddress)}
                     </Button>
                     <BalanceCard>
                         <div>Balance</div>
@@ -115,7 +128,7 @@ const Header = (props: Props) => {
                             marginLeft: '10px'
                         }}
                         onClick={() => {
-                            setMyAddress("");
+                            props.setMyAddress("");
                             setStatusAddress(false);
                             return false;
                         }}><LogoutIcon></LogoutIcon></Button>
