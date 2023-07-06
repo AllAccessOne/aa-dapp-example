@@ -6,10 +6,10 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import Button from "@mui/material/Button";
-import Cookies from 'universal-cookie';
 import { BNBLogo, USDTLogo } from "../../assets/img";
 import { listNetWorks, ChainNetwork } from "../../configs/data/blockchain"
-
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 type InfoTransacions = {
     addressTo: string;
     amount: string;
@@ -17,12 +17,27 @@ type InfoTransacions = {
     origin: string;
     symbol?: string;
 };
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref,
+) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 const Main = () => {
-    const cookies = new Cookies();
     const [network, setNetwork] = useState<ChainNetwork>(listNetWorks.find(network => network.chainID === '97') as ChainNetwork)
     const walletURL: string = process.env.REACT_APP_WALLET_ENDPOINT + "/transaction" as string;
-
+    const [statusTransaction, setStatusTransaction] = useState("");
     const domainTest: string = process.env.REACT_APP_DOMAIN as string;
+    const [open, setOpen] = React.useState(false);
+    const handleClick = () => {
+        setOpen(true);
+    };
+    const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpen(false);
+    };
     const SendETH: InfoTransacions = {
         addressTo: "0x9B0A2787d685dd68245EfD2C737386F392cDD8aE",
         amount: "0.001",
@@ -36,6 +51,27 @@ const Main = () => {
         origin: domainTest,
         contractTo: "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd",
         symbol: "USDT"
+    }
+    const handleSendSignRequest = (dataTransaction: InfoTransacions) => {
+        const popupWindow = window.open(walletURL + "/transaction", "popup", 'width=500,height=700') as Window;
+        popupWindow.postMessage({ type: "SIGN_REQ", data: dataTransaction }, "*");
+        const handleTest = () => {
+            popupWindow.postMessage({ type: "SIGN_REQ", data: dataTransaction }, "*")
+        }
+        setTimeout(handleTest, 1000)
+
+        // const handlePopupResponse = (event: any) => {
+        //     if (event.data.type === "STATUS") {
+        //         const status = event.data.data;
+        //         status ?
+        //             setStatusTransaction(status) : setStatusTransaction("Success!")
+        //         handleClick()
+        //         window.removeEventListener("message", handlePopupResponse);
+        //         popupWindow.close();
+        //     }
+        // };
+        // window.addEventListener("message", handlePopupResponse);
+        return false;
     }
     return (
         <>
@@ -91,8 +127,7 @@ const Main = () => {
                                 variant="contained"
                                 color="primary"
                                 onClick={() => {
-                                    cookies.set("transaction", JSON.stringify(SendETH))
-                                    return false;
+                                    handleSendSignRequest(SendETH)
                                 }
 
                                 }
@@ -125,8 +160,7 @@ const Main = () => {
                                 variant="contained"
                                 color="primary"
                                 onClick={() => {
-                                    cookies.set("transaction", JSON.stringify(SendUSDT))
-                                    return false;
+                                    handleSendSignRequest(SendUSDT)
                                 }
                                 }
                             > Send Transaction</Button>
@@ -134,6 +168,11 @@ const Main = () => {
                     </Card>
                     : null
                 }
+                <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+                    <Alert onClose={handleClose} sx={{ width: '100%' }}>
+                        {statusTransaction}
+                    </Alert>
+                </Snackbar>
             </BodyApp>
         </>
     );

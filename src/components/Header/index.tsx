@@ -1,81 +1,81 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { listNetWorks, ChainNetwork } from "../../configs/data/blockchain"
 import styled from "styled-components"
 import { LogoText, Copy } from "../../assets/icon";
 import { sliceAddress, copyAddress } from "../../utils";
 import { Button } from "@material-ui/core";
 import { getBalance, useBlockchain } from "../../blockchain";
-import { useCookies } from 'react-cookie';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Web3 from "web3";
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Modal from '@mui/material/Modal';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import Stack from '@mui/material/Stack';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 type Props = {
     network: ChainNetwork;
     setNetwork: React.Dispatch<React.SetStateAction<ChainNetwork>>
 }
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref,
+) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 const Header = (props: Props) => {
-    const [cookies, setCookie, removeCookie] = useCookies(['masterKey', 'origin', 'chainId']);
     const walletURL: string = process.env.REACT_APP_WALLET_ENDPOINT as string;
     const domainTest: string = process.env.REACT_APP_DOMAIN as string;
-
     const [myAddress, setMyAddress] = useState('');
     const [balance, setBalance] = useState("0");
     const [statusAddress, setStatusAddress] = useState(false);
+    const [open, setOpen] = React.useState(false);
+    const handleClick = () => {
+        setOpen(true);
+    };
+    const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpen(false);
+    };
     const { web3 } = useBlockchain(props.network.rpcUrls);
 
-
-    // useEffect(() => {
-    //     const masterKey = cookies['masterKey'] || '';
-    //     if (masterKey) {
-    //         getBalance(web3 as Web3).then(res => {
-    //             setBalance(res);
-    //         })
-    //     }
-    //     setStatusAddress(!!masterKey);
-    //     setMyAddress(masterKey);
-    // }, [cookies.masterKey]);
-
-    const updateDomain = (value: string) => {
-        setCookie('origin', value, { path: '/' });
-    };
-    const updateChainId = (value: string) => {
-        setCookie('chainId', value, { path: '/' });
-    };
-    const removeCookieMasterKey = () => {
-        removeCookie('masterKey', { path: '/' });
-    };
     const handleChange = async (event: any) => {
         const currentNetwork = listNetWorks.find(network => network.description === event.target.value) as ChainNetwork;
         props.setNetwork(currentNetwork);
     }
     const handleLogin = () => {
-        const popupWindow = window.open(walletURL, "popup", 'width=500,height=700') as Window;
-        const chainId = props.network.chainID;
-        popupWindow.postMessage({ type: "CHAIN_ID", data: chainId }, "*");
-        const handleTest = () => {
-            popupWindow.postMessage({ type: "CHAIN_ID", data: chainId }, "*")
-        }
         let intervalId: NodeJS.Timeout | undefined;
+        const popupWindow = window.open(walletURL, "popup", 'width=500,height=700') as Window;
+        const dataLogin = {
+            chainId: props.network.chainID,
+            origin: domainTest
+        }
+        popupWindow.postMessage({ type: "LOGIN_REQ", data: dataLogin }, "*");
+        clearInterval(intervalId);
+        const handleTest = () => {
+            popupWindow.postMessage({ type: "LOGIN_REQ", data: dataLogin }, "*")
+        }
         intervalId = setInterval(handleTest, 1000);
         setTimeout(() => {
             clearInterval(intervalId)
-            window.removeEventListener("message", handlePopupResponse);
-            popupWindow.close();
         }, 60000)
         const handlePopupResponse = (event: any) => {
             if (event.data.type === "ADDRESS") {
                 const address = event.data.data;
-                setMyAddress(address);
-                setStatusAddress(!!address);
-                if (address)
-                    getBalance(web3 as Web3, address).then(res => {
-                        setBalance(res);
-                    })
+
+                if (address) {
+                    setMyAddress(address);
+                    setStatusAddress(!!address);
+                    if (address)
+                        getBalance(web3 as Web3, address).then(res => {
+                            setBalance(res);
+                        })
+                }
+                else {
+                    handleClick();
+                }
                 clearInterval(intervalId);
                 window.removeEventListener("message", handlePopupResponse);
                 popupWindow.close();
@@ -139,7 +139,11 @@ const Header = (props: Props) => {
 
                         }}
                     >Connect wallet</Button></>}
-
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
+                    Connect wallet failed!
+                </Alert>
+            </Snackbar>
         </HeaderApp>
     );
 };
