@@ -17,7 +17,6 @@ export const transfer = async (web3: Web3, data: string): Promise<string> => {
         });
     });
   } catch (err) {
-    alert(err);
     return "Error";
   }
 };

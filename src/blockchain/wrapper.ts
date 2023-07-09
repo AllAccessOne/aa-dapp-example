@@ -10,30 +10,31 @@ import { ChainNetwork } from "../configs/data/blockchain";
 // interface Callbacks {
 //   onError: (msg: string) => void;
 // }
-const useBlockchain = (networkState: ChainNetwork, address: string) => {
-
+export type Account = {
+  address: string;
+  publicKey: string;
+}
+const useBlockchain = (networkState: ChainNetwork, account: Account) => {
   const {
     web3,
     transfer: evmTransfer,
     getBalance: evmGetBalance,
-  } = useEVMBlockchain(networkState, address);
+  } = useEVMBlockchain(networkState, account.address);
   const {
     transfer: fvmTransfer,
     getBalance: fvmGetBalance,
-  } = useFlowBlockchain(networkState, address);
+  } = useFlowBlockchain(networkState, account);
 
   const getBalance = async () => {
     const { core } = networkState;
     if (core === "evm") {
-      return evmGetBalance(web3!, address);
+      return evmGetBalance(web3!, account.address);
     }
-    if (core === "fvm") {
+    if (core === "fvm" && account.publicKey) {
       return fvmGetBalance();
     }
     return "0";
   };
-
-
 
   const transfer = async (data: string) => {
     if (isEmpty(networkState)) return;
@@ -41,14 +42,14 @@ const useBlockchain = (networkState: ChainNetwork, address: string) => {
     if (core === "evm") {
       return evmTransfer(web3!, data);
     }
-    if (core === "fvm") {
+    if (core === "fvm" && account.publicKey) {
       return fvmTransfer(data);
     }
     return "";
   };
 
-
   return { web3, getBalance, transfer };
+
 };
 
 export default useBlockchain;

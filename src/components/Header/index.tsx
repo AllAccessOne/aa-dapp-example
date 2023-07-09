@@ -6,7 +6,6 @@ import { sliceAddress, copyAddress } from "../../utils";
 import { Button } from "@material-ui/core";
 import useBlockchain from "../../blockchain/wrapper";
 import LogoutIcon from '@mui/icons-material/Logout';
-import Web3 from "web3";
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
@@ -14,11 +13,13 @@ import Snackbar from '@mui/material/Snackbar';
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import { Account } from "../../blockchain/wrapper";
 type Props = {
     network: ChainNetwork;
     setNetwork: React.Dispatch<React.SetStateAction<ChainNetwork>>;
-    myAddress: string;
-    setMyAddress: React.Dispatch<React.SetStateAction<string>>;
+    myAddress: Account;
+    setMyAddress: React.Dispatch<React.SetStateAction<Account>>;
+    getBalance: () => Promise<string | undefined>;
 }
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
@@ -30,7 +31,6 @@ const Header = (props: Props) => {
     const walletURL: string = process.env.REACT_APP_WALLET_ENDPOINT as string;
     const domainTest: string = process.env.REACT_APP_DOMAIN as string;
     const [openLoadingPage, setOpenLoadingPage] = React.useState(false);
-    const { getBalance } = useBlockchain(props.network, props.myAddress);
     const [balance, setBalance] = useState("0");
     const [statusAddress, setStatusAddress] = useState(false);
     const [open, setOpen] = React.useState(false);
@@ -73,15 +73,17 @@ const Header = (props: Props) => {
         }, 60000)
         const handlePopupResponse = (event: any) => {
             if (event.data.type === "ADDRESS") {
-                const address = event.data.data;
+                const rawAccount = event.data.data;
 
-                if (address) {
-                    props.setMyAddress(address);
-                    setStatusAddress(!!address);
+                if (rawAccount) {
+                    const account: Account = JSON.parse(rawAccount);
+                    props.setMyAddress(account);
+                    setStatusAddress(!!account.address);
                     // if (address)
                     //     getBalance().then(res => {
                     //         setBalance(res as string);
                     //     })
+                    console.log(account)
                     handleOpenLoadingPage()
                     setTimeout(() => handleCloseLoadingPage(), 3000);
                 }
@@ -101,14 +103,14 @@ const Header = (props: Props) => {
     useEffect(() => {
         const fetchBalance = async () => {
             if (props.myAddress) {
-                const balance: string = await getBalance() as string;
+                const balance: string = await props.getBalance() as string;
                 setBalance(balance);
             }
 
         }
 
         fetchBalance();
-    }, [props.myAddress, getBalance(), props.network]);
+    }, [props.myAddress, props.getBalance(), props.network]);
     return (
         <HeaderApp>
             <LogoText style={{ width: "200px", height: "100px" }} />
@@ -123,10 +125,10 @@ const Header = (props: Props) => {
             </FormControlCustom>
             {statusAddress ?
                 <InfoAccount>
-                    <Button onClick={() => copyAddress(props.myAddress)}
+                    <Button onClick={() => copyAddress(props.myAddress.address)}
                         style={{ borderRadius: '10px' }}
                         variant="outlined"
-                    > <Copy style={{ marginRight: '10px' }} />{sliceAddress(props.myAddress)}
+                    > <Copy style={{ marginRight: '10px' }} />{sliceAddress(props.myAddress.address)}
                     </Button>
                     <BalanceCard>
                         <div>Balance</div>
@@ -139,7 +141,7 @@ const Header = (props: Props) => {
                             marginLeft: '10px'
                         }}
                         onClick={() => {
-                            props.setMyAddress("");
+                            props.setMyAddress({ address: "", publicKey: "" });
                             setStatusAddress(false);
                             return false;
                         }}><LogoutIcon></LogoutIcon></Button>

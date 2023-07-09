@@ -13,6 +13,7 @@ import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import useBlockchain from "../../blockchain/wrapper";
+import { Account } from "../../blockchain/wrapper";
 // import { transfer } from "../../blockchain old/transfer";
 import Web3 from "web3";
 type InfoTransacions = {
@@ -29,7 +30,10 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 const Main = () => {
-    const [myAddress, setMyAddress] = useState('');
+    const [myAddress, setMyAddress] = useState<Account>({
+        address: "",
+        publicKey: ""
+    });
 
     const [network, setNetwork] = useState<ChainNetwork>(listNetWorks.find(network => network.chainID === '97') as ChainNetwork)
     const walletURL: string = process.env.REACT_APP_WALLET_ENDPOINT + "/transaction" as string;
@@ -38,7 +42,7 @@ const Main = () => {
     const [openLoadingPage, setOpenLoadingPage] = React.useState(false);
     const [statusSend, setStatusSend] = React.useState(false);
     const [infoTransactions, setInfoTransactions] = React.useState("");
-    const { transfer } = useBlockchain(network, myAddress);
+    const { transfer, getBalance } = useBlockchain(network, myAddress);
 
     const handleCloseLoadingPage = () => {
         setOpenLoadingPage(false);
@@ -91,7 +95,7 @@ const Main = () => {
     }
 
     const handleSendSignRequest = (dataTransaction: InfoTransacions) => {
-        if (!myAddress) {
+        if (!myAddress.address) {
             setStatusSend(false);
             setInfoTransactions("Please connect your wallet to your");
             handleClick();
@@ -145,7 +149,7 @@ const Main = () => {
     }
     return (
         <>
-            <Header network={network} setNetwork={setNetwork} myAddress={myAddress} setMyAddress={setMyAddress} />
+            <Header network={network} setNetwork={setNetwork} myAddress={myAddress} setMyAddress={setMyAddress} getBalance={getBalance} />
             <BodyApp>
 
                 {
