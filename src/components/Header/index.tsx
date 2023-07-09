@@ -11,7 +11,8 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Snackbar from '@mui/material/Snackbar';
-
+import Backdrop from "@mui/material/Backdrop";
+import CircularProgress from "@mui/material/CircularProgress";
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 type Props = {
     network: ChainNetwork;
@@ -28,7 +29,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
 const Header = (props: Props) => {
     const walletURL: string = process.env.REACT_APP_WALLET_ENDPOINT as string;
     const domainTest: string = process.env.REACT_APP_DOMAIN as string;
-
+    const [openLoadingPage, setOpenLoadingPage] = React.useState(false);
     const { getBalance } = useBlockchain(props.network, props.myAddress);
     const [balance, setBalance] = useState("0");
     const [statusAddress, setStatusAddress] = useState(false);
@@ -42,6 +43,12 @@ const Header = (props: Props) => {
             return;
         }
         setOpen(false);
+    };
+    const handleCloseLoadingPage = () => {
+        setOpenLoadingPage(false);
+    };
+    const handleOpenLoadingPage = () => {
+        setOpenLoadingPage(true);
     };
 
     const handleChange = async (event: any) => {
@@ -75,6 +82,8 @@ const Header = (props: Props) => {
                     //     getBalance().then(res => {
                     //         setBalance(res as string);
                     //     })
+                    handleOpenLoadingPage()
+                    setTimeout(() => handleCloseLoadingPage(), 3000);
                 }
                 else {
                     handleClick();
@@ -94,7 +103,6 @@ const Header = (props: Props) => {
             if (props.myAddress) {
                 const balance: string = await getBalance() as string;
                 setBalance(balance);
-
             }
 
         }
@@ -160,6 +168,9 @@ const Header = (props: Props) => {
                     Connect wallet failed!
                 </Alert>
             </Snackbar>
+            <Backdrop sx={{ color: "#fff", zIndex: theme => theme.zIndex.drawer + 1 }} open={openLoadingPage}>
+                <CircularProgress color='inherit' />
+            </Backdrop>
         </HeaderApp>
     );
 };

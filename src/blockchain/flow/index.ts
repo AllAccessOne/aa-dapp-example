@@ -26,7 +26,6 @@ export const useFlowBlockchain = (networkState: ChainNetwork, address: string) =
 
   const getBalance = async () => {
     const account = await getAccount();
-    console.log(account);
     if (account) {
       const response = await fcl.send([fcl.script(GetBalanceFlowScript), fcl.args([fcl.arg(account, t.Address)])]);
       const res = await fcl.decode(response);

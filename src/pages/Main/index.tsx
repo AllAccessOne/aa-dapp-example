@@ -121,6 +121,7 @@ const Main = () => {
                     return false;
                 }
                 if (data.signed) {
+                    console.log(data.signed);
                     await handleSend(data.signed)
                 }
                 else if (data.error) {
