@@ -25,7 +25,7 @@ const useBlockchain = (networkState: ChainNetwork, address: string) => {
   const getBalance = async () => {
     const { core } = networkState;
     if (core === "evm") {
-      return evmGetBalance(web3!);
+      return evmGetBalance(web3!, address);
     }
     if (core === "fvm") {
       return fvmGetBalance();

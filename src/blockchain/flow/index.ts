@@ -1,19 +1,10 @@
-import { SHA3 } from "sha3";
-import { formatUnits } from "ethers";
-import * as EC from "elliptic";
-import { useLocalStorage } from "usehooks-ts";
-import { useEffect, useState } from "react";
+
+import { useEffect } from "react";
 import * as fcl from "@onflow/fcl";
-import { TransferFlowScript } from "./transactions";
 import { isEmpty } from "lodash";
-import { createFlowAccount } from "./apis";
-import { Callbacks, DefaultCallbacks, SignedTransferResponse, TransferNative, TransferToken } from "../types";
-import numeral from "numeral";
 import { GetBalanceFlowScript } from "./scripts";
-import { TransactionStatus } from "./types";
 import { ChainNetwork } from "../../configs/data/blockchain";
 const { t } = fcl;
-const ec = new EC.ec("secp256k1");
 
 export const useFlowBlockchain = (networkState: ChainNetwork, address: string) => {
   const getAccount = async () => {

@@ -28,10 +28,11 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
 const Header = (props: Props) => {
     const walletURL: string = process.env.REACT_APP_WALLET_ENDPOINT as string;
     const domainTest: string = process.env.REACT_APP_DOMAIN as string;
+
+    const { getBalance } = useBlockchain(props.network, props.myAddress);
     const [balance, setBalance] = useState("0");
     const [statusAddress, setStatusAddress] = useState(false);
     const [open, setOpen] = React.useState(false);
-    const { getBalance } = useBlockchain(props.network, props.myAddress);
 
     const handleClick = () => {
         setOpen(true);
@@ -70,11 +71,10 @@ const Header = (props: Props) => {
                 if (address) {
                     props.setMyAddress(address);
                     setStatusAddress(!!address);
-                    if (address)
-                        getBalance().then(res => {
-                            console.log(res);
-                            setBalance(res as string);
-                        })
+                    // if (address)
+                    //     getBalance().then(res => {
+                    //         setBalance(res as string);
+                    //     })
                 }
                 else {
                     handleClick();
@@ -88,20 +88,19 @@ const Header = (props: Props) => {
 
         return false;
     }
-    useEffect(() => {
 
-    }, [])
     useEffect(() => {
-        try {
-            if (props.myAddress)
-                getBalance().then(res => {
-                    setBalance(res as string);
-                })
+        const fetchBalance = async () => {
+            if (props.myAddress) {
+                const balance: string = await getBalance() as string;
+                setBalance(balance);
+
+            }
+
         }
-        catch {
-            setBalance("Error");
-        }
-    }, [props.myAddress])
+
+        fetchBalance();
+    }, [props.myAddress, getBalance(), props.network]);
     return (
         <HeaderApp>
             <LogoText style={{ width: "200px", height: "100px" }} />
