@@ -12,8 +12,8 @@ import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useBlockchain } from "../../blockchain";
-import { transfer } from "../../blockchain/transfer";
+import useBlockchain from "../../blockchain/wrapper";
+// import { transfer } from "../../blockchain old/transfer";
 import Web3 from "web3";
 type InfoTransacions = {
     addressTo: string;
@@ -38,7 +38,7 @@ const Main = () => {
     const [openLoadingPage, setOpenLoadingPage] = React.useState(false);
     const [statusSend, setStatusSend] = React.useState(false);
     const [infoTransactions, setInfoTransactions] = React.useState("");
-    const { web3 } = useBlockchain(network.rpcUrls, myAddress);
+    const { transfer } = useBlockchain(network, myAddress);
 
     const handleCloseLoadingPage = () => {
         setOpenLoadingPage(false);
@@ -49,7 +49,7 @@ const Main = () => {
     const handleSend = async (data: string) => {
 
         handleOpenLoadingPage();
-        const text = await transfer(web3 as Web3, data);
+        const text = await transfer(data);
         if (text === "Successfully") {
             setStatusSend(true);
         }
@@ -58,7 +58,7 @@ const Main = () => {
         }
         handleClick();
         handleCloseLoadingPage();
-        setInfoTransactions(text);
+        setInfoTransactions(text as string);
 
     };
     const handleClick = () => {
@@ -72,17 +72,24 @@ const Main = () => {
     };
     const SendBNB: InfoTransacions = {
         addressTo: "0x9B0A2787d685dd68245EfD2C737386F392cDD8aE",
-        amount: "0.001",
+        amount: "0.00001",
         origin: domainTest,
         symbol: "BNB"
 
     }
     const SendETHGoerli: InfoTransacions = {
         addressTo: "0x9B0A2787d685dd68245EfD2C737386F392cDD8aE",
-        amount: "0.001",
+        amount: "0.00001",
         origin: domainTest,
         symbol: "ETH"
     }
+    const SendFlow: InfoTransacions = {
+        addressTo: "0xfb201e731d5e0691",
+        amount: "0.00001",
+        origin: domainTest,
+        symbol: "Flow"
+    }
+
     const handleSendSignRequest = (dataTransaction: InfoTransacions) => {
         if (!myAddress) {
             setStatusSend(false);
@@ -161,6 +168,9 @@ const Main = () => {
                                     fullWidth
                                     variant="contained"
                                     color="primary"
+                                    onClick={() =>
+                                        handleSendSignRequest(SendFlow)
+                                    }
                                 > Send Transaction</Button>
                             </CardContent>
                         </Card> : null

@@ -4,7 +4,7 @@ import styled from "styled-components"
 import { LogoText, Copy } from "../../assets/icon";
 import { sliceAddress, copyAddress } from "../../utils";
 import { Button } from "@material-ui/core";
-import { getBalance, useBlockchain } from "../../blockchain";
+import useBlockchain from "../../blockchain/wrapper";
 import LogoutIcon from '@mui/icons-material/Logout';
 import Web3 from "web3";
 import MenuItem from '@mui/material/MenuItem';
@@ -31,7 +31,7 @@ const Header = (props: Props) => {
     const [balance, setBalance] = useState("0");
     const [statusAddress, setStatusAddress] = useState(false);
     const [open, setOpen] = React.useState(false);
-    const { web3 } = useBlockchain(props.network.rpcUrls, props.myAddress);
+    const { getBalance } = useBlockchain(props.network, props.myAddress);
 
     const handleClick = () => {
         setOpen(true);
@@ -71,8 +71,9 @@ const Header = (props: Props) => {
                     props.setMyAddress(address);
                     setStatusAddress(!!address);
                     if (address)
-                        getBalance(web3 as Web3, address).then(res => {
-                            setBalance(res);
+                        getBalance().then(res => {
+                            console.log(res);
+                            setBalance(res as string);
                         })
                 }
                 else {
@@ -88,11 +89,14 @@ const Header = (props: Props) => {
         return false;
     }
     useEffect(() => {
-        try {
 
-            getBalance(web3 as Web3, props.myAddress).then(res => {
-                setBalance(res);
-            })
+    }, [])
+    useEffect(() => {
+        try {
+            if (props.myAddress)
+                getBalance().then(res => {
+                    setBalance(res as string);
+                })
         }
         catch {
             setBalance("Error");
