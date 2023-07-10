@@ -4,7 +4,6 @@ import styled from "styled-components"
 import { LogoText, Copy } from "../../assets/icon";
 import { sliceAddress, copyAddress } from "../../utils";
 import { Button } from "@material-ui/core";
-import useBlockchain from "../../blockchain/wrapper";
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
@@ -57,7 +56,7 @@ const Header = (props: Props) => {
     }
     const handleLogin = () => {
         let intervalId: NodeJS.Timeout | undefined;
-        const popupWindow = window.open(walletURL, "popup", 'width=500,height=700') as Window;
+        const popupWindow = window.open(walletURL, "popup", 'width=599,height=700') as Window;
         const dataLogin = {
             chainId: props.network.chainID,
             origin: domainTest
@@ -83,7 +82,6 @@ const Header = (props: Props) => {
                     //     getBalance().then(res => {
                     //         setBalance(res as string);
                     //     })
-                    console.log(account)
                     handleOpenLoadingPage()
                     setTimeout(() => handleCloseLoadingPage(), 3000);
                 }

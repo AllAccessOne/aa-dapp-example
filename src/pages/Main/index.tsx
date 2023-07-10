@@ -103,7 +103,7 @@ const Main = () => {
         }
         let intervalId: NodeJS.Timeout | undefined;
 
-        const popupWindow = window.open(walletURL, "popup", 'width=500,height=700') as Window;
+        const popupWindow = window.open(walletURL, "popup", 'width=599,height=700') as Window;
         popupWindow.postMessage({ type: "SIGN_REQ", data: dataTransaction }, "*");
         const handleTest = () => {
             popupWindow.postMessage({ type: "SIGN_REQ", data: dataTransaction }, "*")

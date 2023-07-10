@@ -10,6 +10,8 @@ export type ChainNetwork = {
   title: string;
   description: string;
   apiTransactionHash?: string;
+  flowToken?: string;
+  flowFungibleToken?: string;
 };
 export const listNetWorks: ChainNetwork[] = [
 
@@ -27,6 +29,8 @@ export const listNetWorks: ChainNetwork[] = [
     rpcUrls: RPC_FLOW || "https://access-testnet.onflow.org",
     title: "Flow",
     description: "Flow blockchain Testnet",
+    flowToken: "0x7e60df042a9c0868",
+    flowFungibleToken: "0x9a0766d93b6608b7",
   },
   {
     chainID: "5",
@@ -35,5 +39,6 @@ export const listNetWorks: ChainNetwork[] = [
     title: "ETH",
     description: "Goerli Testnet",
     apiTransactionHash: "https://goerli.etherscan.io/tx/{transactionHash}",
+
   },
 ];
