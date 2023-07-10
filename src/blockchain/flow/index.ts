@@ -28,7 +28,6 @@ export const useFlowBlockchain = (networkState: ChainNetwork, masterKey: Account
     if (masterKey.address) {
       const response = await fcl.send([fcl.script(GetBalanceFlowScript), fcl.args([fcl.arg(masterKey.address, t.Address)])]);
       const res = await fcl.decode(response);
-      console.log(res as string);
       return res as string;
     }
     return;
@@ -39,7 +38,7 @@ export const useFlowBlockchain = (networkState: ChainNetwork, masterKey: Account
     const signedTransaction = JSON.parse(data);
     try {
       await fcl.send(signedTransaction)
-      return "Sucessfully";
+      return "Sucessfully: ";
     }
     catch (err) {
       return "Unknown error";

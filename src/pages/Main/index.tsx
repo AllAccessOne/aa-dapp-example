@@ -53,8 +53,8 @@ const Main = () => {
     const handleSend = async (data: string) => {
 
         handleOpenLoadingPage();
-        const text = await transfer(data);
-        if (text === "Successfully") {
+        const text = await transfer(data) as string;
+        if (text.slice(0, 7) === "Success") {
             setStatusSend(true);
         }
         else {
@@ -89,7 +89,7 @@ const Main = () => {
     }
     const SendFlow: InfoTransacions = {
         addressTo: "0xfb201e731d5e0691",
-        amount: "0.00001",
+        amount: "2",
         origin: domainTest,
         symbol: "Flow"
     }
@@ -97,13 +97,13 @@ const Main = () => {
     const handleSendSignRequest = (dataTransaction: InfoTransacions) => {
         if (!myAddress.address) {
             setStatusSend(false);
-            setInfoTransactions("Please connect your wallet to your");
+            setInfoTransactions("Please connect your wallet");
             handleClick();
             return false;
         }
         let intervalId: NodeJS.Timeout | undefined;
 
-        const popupWindow = window.open(walletURL, "popup", 'width=599,height=700') as Window;
+        const popupWindow = window.open(walletURL, "popup") as Window;
         popupWindow.postMessage({ type: "SIGN_REQ", data: dataTransaction }, "*");
         const handleTest = () => {
             popupWindow.postMessage({ type: "SIGN_REQ", data: dataTransaction }, "*")
@@ -115,6 +115,7 @@ const Main = () => {
         const handlePopupResponse = async (event: any) => {
             if (event.data.type === "STATUS") {
                 const data = event.data.data;
+                console.log(data);
                 if (!data) {
                     setStatusSend(false);
                     setInfoTransactions("Reject from Wallet");
@@ -124,9 +125,18 @@ const Main = () => {
                     popupWindow.close();
                     return false;
                 }
+
                 if (data.signed) {
-                    console.log(data.signed);
-                    await handleSend(data.signed)
+                    if (network.core === 'evm') {
+                        console.log(data.signed);
+                        await handleSend(data.signed)
+                    }
+                    else {
+                        console.log(data.signed);
+                        setStatusSend(true);
+                        setInfoTransactions("Successfully: " + data.signed.transactionId);
+                        handleClick();
+                    }
                 }
                 else if (data.error) {
                     setStatusSend(false);
@@ -165,7 +175,7 @@ const Main = () => {
                                     Send Flow to other Address
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    I will send 0.01 Flow of you for address 0x090f8a70ed0dca73
+                                    I will send 2 Flow of you for address 0x090f8a70ed0dca73
                                 </Typography>
                                 <Button
                                     size="large"
@@ -193,7 +203,7 @@ const Main = () => {
                                 Send BNB to other Address
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                I will send 0.01 BNB of you for address 0x9B0A2787d685dd68245EfD2C737386F392cDD8aE
+                                I will send 0.00001 BNB of you for address 0x9B0A2787d685dd68245EfD2C737386F392cDD8aE
                             </Typography>
                             <Button
                                 size="large"
@@ -224,7 +234,7 @@ const Main = () => {
                                 Send ETH to other Address
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                I will send 0.001 ETH of you for address 0x9B0A2787d685dd68245EfD2C737386F392cDD8aE
+                                I will send 0.00001 ETH of you for address 0x9B0A2787d685dd68245EfD2C737386F392cDD8aE
                             </Typography>
                             <Button
                                 size="large"

@@ -56,7 +56,7 @@ const Header = (props: Props) => {
     }
     const handleLogin = () => {
         let intervalId: NodeJS.Timeout | undefined;
-        const popupWindow = window.open(walletURL, "popup", 'width=599,height=700') as Window;
+        const popupWindow = window.open(walletURL, "popup") as Window;
         const dataLogin = {
             chainId: props.network.chainID,
             origin: domainTest

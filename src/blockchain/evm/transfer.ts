@@ -10,7 +10,7 @@ export const transfer = async (web3: Web3, data: string): Promise<string> => {
     return new Promise((resolve, reject) => {
       web3.eth.sendSignedTransaction(signedTransaction.rawTransaction)
         .on("receipt", receipt => {
-          resolve("Successfully");
+          resolve("Successfully: " + receipt.transactionHash);
         })
         .on("error", error => {
           reject(error.message ? error.message : "Error");
