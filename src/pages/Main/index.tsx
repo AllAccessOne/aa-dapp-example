@@ -12,8 +12,9 @@ import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useBlockchain } from "../../blockchain";
-import { transfer } from "../../blockchain/transfer";
+import useBlockchain from "../../blockchain/wrapper";
+import { Account } from "../../blockchain/wrapper";
+// import { transfer } from "../../blockchain old/transfer";
 import Web3 from "web3";
 type InfoTransacions = {
     addressTo: string;
@@ -29,7 +30,10 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 const Main = () => {
-    const [myAddress, setMyAddress] = useState('');
+    const [myAddress, setMyAddress] = useState<Account>({
+        address: "",
+        publicKey: ""
+    });
 
     const [network, setNetwork] = useState<ChainNetwork>(listNetWorks.find(network => network.chainID === '97') as ChainNetwork)
     const walletURL: string = process.env.REACT_APP_WALLET_ENDPOINT + "/transaction" as string;
@@ -38,7 +42,7 @@ const Main = () => {
     const [openLoadingPage, setOpenLoadingPage] = React.useState(false);
     const [statusSend, setStatusSend] = React.useState(false);
     const [infoTransactions, setInfoTransactions] = React.useState("");
-    const { web3 } = useBlockchain(network.rpcUrls, myAddress);
+    const { transfer, getBalance } = useBlockchain(network, myAddress);
 
     const handleCloseLoadingPage = () => {
         setOpenLoadingPage(false);
@@ -49,8 +53,8 @@ const Main = () => {
     const handleSend = async (data: string) => {
 
         handleOpenLoadingPage();
-        const text = await transfer(web3 as Web3, data);
-        if (text === "Successfully") {
+        const text = await transfer(data) as string;
+        if (text.slice(0, 7) === "Success") {
             setStatusSend(true);
         }
         else {
@@ -58,7 +62,7 @@ const Main = () => {
         }
         handleClick();
         handleCloseLoadingPage();
-        setInfoTransactions(text);
+        setInfoTransactions(text as string);
 
     };
     const handleClick = () => {
@@ -72,27 +76,34 @@ const Main = () => {
     };
     const SendBNB: InfoTransacions = {
         addressTo: "0x9B0A2787d685dd68245EfD2C737386F392cDD8aE",
-        amount: "0.001",
+        amount: "0.00001",
         origin: domainTest,
         symbol: "BNB"
 
     }
     const SendETHGoerli: InfoTransacions = {
         addressTo: "0x9B0A2787d685dd68245EfD2C737386F392cDD8aE",
-        amount: "0.001",
+        amount: "0.00001",
         origin: domainTest,
         symbol: "ETH"
     }
+    const SendFlow: InfoTransacions = {
+        addressTo: "0xfb201e731d5e0691",
+        amount: "2",
+        origin: domainTest,
+        symbol: "Flow"
+    }
+
     const handleSendSignRequest = (dataTransaction: InfoTransacions) => {
-        if (!myAddress) {
+        if (!myAddress.address) {
             setStatusSend(false);
-            setInfoTransactions("Please connect your wallet to your");
+            setInfoTransactions("Please connect your wallet");
             handleClick();
             return false;
         }
         let intervalId: NodeJS.Timeout | undefined;
 
-        const popupWindow = window.open(walletURL, "popup", 'width=500,height=700') as Window;
+        const popupWindow = window.open(walletURL, "popup") as Window;
         popupWindow.postMessage({ type: "SIGN_REQ", data: dataTransaction }, "*");
         const handleTest = () => {
             popupWindow.postMessage({ type: "SIGN_REQ", data: dataTransaction }, "*")
@@ -104,6 +115,7 @@ const Main = () => {
         const handlePopupResponse = async (event: any) => {
             if (event.data.type === "STATUS") {
                 const data = event.data.data;
+                console.log(data);
                 if (!data) {
                     setStatusSend(false);
                     setInfoTransactions("Reject from Wallet");
@@ -113,8 +125,18 @@ const Main = () => {
                     popupWindow.close();
                     return false;
                 }
+
                 if (data.signed) {
-                    await handleSend(data.signed)
+                    if (network.core === 'evm') {
+                        console.log(data.signed);
+                        await handleSend(data.signed)
+                    }
+                    else {
+                        console.log(data.signed);
+                        setStatusSend(true);
+                        setInfoTransactions("Successfully: " + data.signed.transactionId);
+                        handleClick();
+                    }
                 }
                 else if (data.error) {
                     setStatusSend(false);
@@ -137,7 +159,7 @@ const Main = () => {
     }
     return (
         <>
-            <Header network={network} setNetwork={setNetwork} myAddress={myAddress} setMyAddress={setMyAddress} />
+            <Header network={network} setNetwork={setNetwork} myAddress={myAddress} setMyAddress={setMyAddress} getBalance={getBalance} />
             <BodyApp>
 
                 {
@@ -153,7 +175,7 @@ const Main = () => {
                                     Send Flow to other Address
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    I will send 0.01 Flow of you for address 0x090f8a70ed0dca73
+                                    I will send 2 Flow of you for address 0x090f8a70ed0dca73
                                 </Typography>
                                 <Button
                                     size="large"
@@ -161,6 +183,9 @@ const Main = () => {
                                     fullWidth
                                     variant="contained"
                                     color="primary"
+                                    onClick={() =>
+                                        handleSendSignRequest(SendFlow)
+                                    }
                                 > Send Transaction</Button>
                             </CardContent>
                         </Card> : null
@@ -178,7 +203,7 @@ const Main = () => {
                                 Send BNB to other Address
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                I will send 0.01 BNB of you for address 0x9B0A2787d685dd68245EfD2C737386F392cDD8aE
+                                I will send 0.00001 BNB of you for address 0x9B0A2787d685dd68245EfD2C737386F392cDD8aE
                             </Typography>
                             <Button
                                 size="large"
@@ -209,7 +234,7 @@ const Main = () => {
                                 Send ETH to other Address
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                I will send 0.001 ETH of you for address 0x9B0A2787d685dd68245EfD2C737386F392cDD8aE
+                                I will send 0.00001 ETH of you for address 0x9B0A2787d685dd68245EfD2C737386F392cDD8aE
                             </Typography>
                             <Button
                                 size="large"
