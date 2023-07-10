@@ -134,7 +134,8 @@ const Main = () => {
                     else {
                         console.log(data.signed);
                         setStatusSend(true);
-                        setInfoTransactions("Successfully: " + data.signed.transactionId);
+                        const decodedData = JSON.parse(data.signed);
+                        setInfoTransactions("Successfully: " + decodedData.transactionId);
                         handleClick();
                     }
                 }
