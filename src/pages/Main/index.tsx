@@ -16,7 +16,7 @@ import useBlockchain from "../../blockchain/wrapper";
 import { Account } from "../../blockchain/wrapper";
 // import { transfer } from "../../blockchain old/transfer";
 import Web3 from "web3";
-type InfoTransacions = {
+type InfoTransactions = {
     addressTo: string;
     amount: string;
     contractTo?: string;
@@ -42,6 +42,8 @@ const Main = () => {
     const [openLoadingPage, setOpenLoadingPage] = React.useState(false);
     const [statusSend, setStatusSend] = React.useState(false);
     const [infoTransactions, setInfoTransactions] = React.useState("");
+    const [transactionHash, setTransactionHash] = React.useState("");
+    const [url, setUrl] = React.useState("");
     const { transfer, getBalance } = useBlockchain(network, myAddress);
 
     const handleCloseLoadingPage = () => {
@@ -54,16 +56,20 @@ const Main = () => {
 
         handleOpenLoadingPage();
         const text = await transfer(data) as string;
-        if (text.slice(0, 7) === "Success") {
+        if (text.slice(0, 2) === "0x") {
+            setTransactionHash(text);
             setStatusSend(true);
+            handleClick();
+            handleCloseLoadingPage();
+            setInfoTransactions("Successfully: " + text);
+
         }
         else {
             setStatusSend(false);
+            handleClick();
+            handleCloseLoadingPage();
+            setInfoTransactions(text);
         }
-        handleClick();
-        handleCloseLoadingPage();
-        setInfoTransactions(text as string);
-
     };
     const handleClick = () => {
         setOpen(true);
@@ -74,27 +80,27 @@ const Main = () => {
         }
         setOpen(false);
     };
-    const SendBNB: InfoTransacions = {
+    const SendBNB: InfoTransactions = {
         addressTo: "0x9B0A2787d685dd68245EfD2C737386F392cDD8aE",
         amount: "0.00001",
         origin: domainTest,
         symbol: "BNB"
 
     }
-    const SendETHGoerli: InfoTransacions = {
+    const SendETHGoerli: InfoTransactions = {
         addressTo: "0x9B0A2787d685dd68245EfD2C737386F392cDD8aE",
         amount: "0.00001",
         origin: domainTest,
         symbol: "ETH"
     }
-    const SendFlow: InfoTransacions = {
+    const SendFlow: InfoTransactions = {
         addressTo: "0xfb201e731d5e0691",
         amount: "2",
         origin: domainTest,
         symbol: "Flow"
     }
 
-    const handleSendSignRequest = (dataTransaction: InfoTransacions) => {
+    const handleSendSignRequest = (dataTransaction: InfoTransactions) => {
         if (!myAddress.address) {
             setStatusSend(false);
             setInfoTransactions("Please connect your wallet");
@@ -135,6 +141,7 @@ const Main = () => {
                         console.log(data.signed);
                         setStatusSend(true);
                         const decodedData = JSON.parse(data.signed);
+                        setTransactionHash(decodedData.transactionId);
                         setInfoTransactions("Successfully: " + decodedData.transactionId);
                         handleClick();
                     }
@@ -158,6 +165,15 @@ const Main = () => {
         return false;
 
     }
+    useEffect(() => {
+        if (statusSend) {
+            const url = network.apiTransactionHash?.replace(
+                "{transactionHash}",
+                transactionHash
+            ) as string;
+            setUrl(url);
+        }
+    }, [transactionHash])
     return (
         <>
             <Header network={network} setNetwork={setNetwork} myAddress={myAddress} setMyAddress={setMyAddress} getBalance={getBalance} />
@@ -204,7 +220,7 @@ const Main = () => {
                                 Send BNB to other Address
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                I will send 0.00001 BNB of you for address 0x9B0A2787d685dd68245EfD2C737386F392cDD8aE
+                                I will send 0.00001 BNB of you for address 0x9B0A27...cDD8aE
                             </Typography>
                             <Button
                                 size="large"
@@ -235,7 +251,7 @@ const Main = () => {
                                 Send ETH to other Address
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                I will send 0.00001 ETH of you for address 0x9B0A2787d685dd68245EfD2C737386F392cDD8aE
+                                I will send 0.00001 ETH of you for address 0x9B0A278...cDD8aE
                             </Typography>
                             <Button
                                 size="large"
@@ -253,8 +269,19 @@ const Main = () => {
                     : null
                 }
                 <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
-                    <Alert severity={statusSend ? "success" : "error"} onClose={handleClose} sx={{ width: '100%' }}>
-                        {infoTransactions}
+                    <Alert
+                        severity={statusSend ? "success" : "error"}
+                        onClose={handleClose}
+                        sx={{ width: "100%", cursor: statusSend ? "pointer" : "default" }}
+                    >
+                        {statusSend ?
+                            <>
+                                Successfully:
+                                <a href={url} style={{ color: "white" }} target="_blank">{transactionHash}</a>
+                            </>
+                            : infoTransactions
+
+                        }
                     </Alert>
                 </Snackbar>
                 <Backdrop sx={{ color: "#fff", zIndex: theme => theme.zIndex.drawer + 1 }} open={openLoadingPage}>
